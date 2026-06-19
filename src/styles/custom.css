@@ -44,6 +44,9 @@
 }
 
 /* Cookie consent banner */
+.ih-consent[hidden] {
+  display: none;
+}
 .ih-consent {
   position: fixed;
   bottom: 1rem;
