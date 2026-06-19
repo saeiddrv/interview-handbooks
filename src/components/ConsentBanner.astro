@@ -58,6 +58,10 @@ const GA_ID = 'G-V472E22113';
       loadGA();
     }
 
+    function revoke() {
+      gtag('consent', 'update', { analytics_storage: 'denied' });
+    }
+
     var banner = document.getElementById('ih-consent');
     // Move the banner to <body> so it escapes any transformed/contained
     // ancestor (the footer column) and its fixed positioning + z-index win.
@@ -88,7 +92,20 @@ const GA_ID = 'G-V472E22113';
         try {
           localStorage.setItem(KEY, 'denied');
         } catch (e) {}
+        revoke();
         if (banner) banner.hidden = true;
       });
+
+    // "Cookie settings" link (rendered in the footer on every page) reopens the banner.
+    function reopen() {
+      if (banner) banner.hidden = false;
+    }
+    document.addEventListener('click', function (ev) {
+      var t = ev.target;
+      if (t && t.id === 'ih-cookie-settings') {
+        ev.preventDefault();
+        reopen();
+      }
+    });
   })();
 </script>
