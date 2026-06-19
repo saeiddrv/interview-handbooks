@@ -24,10 +24,22 @@ Your choice is remembered in your browser's local storage so you are not asked a
 
 We do not use any cookies for advertising, profiling, or cross-site tracking.
 
+- The site itself (built with Astro and Starlight) sets **no cookies at all**.
 - **No cookies** are set unless you accept analytics.
 - If you accept, **Google Analytics** sets its own cookies to measure usage. IP addresses are
   anonymized (`anonymize_ip`), and analytics runs under Google Consent Mode, which stays in a
   denied state until you opt in.
+
+## Local storage (functional, no tracking)
+
+To make the site work the way you expect, we use a small amount of your browser's local storage.
+This stays on your device, is never sent to a server, and is not used to identify or track you:
+
+- `starlight-theme` — remembers your light/dark theme choice.
+- `sl-sidebar-state` — remembers which navigation sections you expanded.
+- `ih-consent` — remembers your analytics choice so we don't ask again.
+
+These are strictly functional and you can clear them at any time via your browser settings.
 
 ## Analytics (Google Analytics 4)
 
