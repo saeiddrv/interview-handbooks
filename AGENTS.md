@@ -89,8 +89,9 @@ The line that sounds senior.
 5. Build and verify (see below).
 
 ### Topics worth adding next (senior → principal coverage gaps)
-Observability/SRE, CI/CD, Terraform/IaC, API design & GraphQL, distributed-systems theory,
-concurrency, cloud/AWS, testing strategy. Ship each as its own PR.
+Observability/SRE, CI/CD, Terraform/IaC, API design & GraphQL, concurrency, cloud/AWS, testing
+strategy. (Distributed-systems theory and staff behavioral/leadership are now covered.) Ship each
+as its own PR.
 
 ## How to EDIT an existing topic
 
