@@ -421,4 +421,4 @@ A **service mesh** (Istio, Linkerd) handles **service-to-service networking** vi
 
 *End of handbook. The senior signal: microservices are a **distributed-systems** discipline — own your
 data, communicate async, use **Saga + Outbox** for consistency, design for **partial failure**, and stay
-**observable**. The cardinal sin is the distributed monolith. 🧩*
+**observable**. The cardinal sin is the distributed monolith.*

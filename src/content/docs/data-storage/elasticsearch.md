@@ -446,4 +446,4 @@ ES's analytics engine — compute stats over matching docs (powers Kibana dashbo
 ---
 
 *End of handbook. The senior signal: ES is a **near-real-time, eventually-consistent search engine over
-an inverted index** — reason about shards, analysis, refresh, and scoring from there. 🔍*
+an inverted index** — reason about shards, analysis, refresh, and scoring from there.*

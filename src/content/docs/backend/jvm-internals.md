@@ -552,4 +552,4 @@ suspend fun loadUser(): User = withContext(Dispatchers.IO) { api.fetch() }
 ---
 
 *End of handbook. Master the four pillars — memory model, GC, the two-stage compilation, and JDK
-customization — and you'll handle any Java/Kotlin internals interview. ☕*
+customization — and you'll handle any Java/Kotlin internals interview.*

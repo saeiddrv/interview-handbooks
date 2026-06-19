@@ -754,4 +754,4 @@ Use `git filter-repo` to strip the file/string from all commits, force-push, hav
 ---
 
 *End of handbook. Master the escape hatches (`reflog`, `revert`, `bisect`, `worktree`) and you'll be
-unshakeable in any Git interview or real-world crisis. 🌳*
+unshakeable in any Git interview or real-world crisis.*

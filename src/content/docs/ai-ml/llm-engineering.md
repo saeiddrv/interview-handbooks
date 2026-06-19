@@ -559,4 +559,4 @@ start/end and retrieve less-but-better.
 ---
 
 *End of handbook. Master the four loops — prompt → retrieve → act → standardize — and you'll be ready
-for any LLM-engineering interview. 🤖*
+for any LLM-engineering interview.*

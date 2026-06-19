@@ -114,7 +114,7 @@ Quick content checks:
 # no emoji should ever match in content (portable, works on macOS)
 python3 - <<'PY'
 import pathlib, re
-rng = re.compile('[\U0001F300-\U0001FAFF\u2600-\u27BF\u2B00-\u2BFF\u2190-\u21FF]')
+rng = re.compile('[\U0001F300-\U0001FAFF\u2600-\u26FF\u2700-\u27BF\u2B00-\u2BFF]')  # emoji only (arrows like → are fine)
 bad = [str(p) for p in pathlib.Path('src/content/docs').rglob('*.md') if rng.search(p.read_text())]
 print('FIX: emoji in', bad) if bad else print('no emoji ✓')
 PY

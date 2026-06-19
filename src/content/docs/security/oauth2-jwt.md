@@ -404,4 +404,4 @@ no server-side session to delete. If a token is stolen, it's valid until `exp`.
 
 *End of handbook. The senior signal: **OAuth authorizes, OIDC authenticates, JWT is a stateless signed
 token** — validate `aud`/`iss`/`alg` (not just the signature), and remember JWT's hard problem is
-**revocation**. 🔐*
+**revocation**.*

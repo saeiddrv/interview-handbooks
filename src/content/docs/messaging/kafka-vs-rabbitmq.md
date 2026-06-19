@@ -575,4 +575,4 @@ writes; pure broker exactly-once isn't enough across boundaries.
 ---
 
 *End of handbook. Remember the one-liner — **RabbitMQ routes & deletes (queue); Kafka retains & replays
-(log)** — and reason about delivery guarantees, ordering, and idempotency from there. 🐰🦫*
+(log)** — and reason about delivery guarantees, ordering, and idempotency from there.*

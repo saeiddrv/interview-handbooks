@@ -443,4 +443,4 @@ How the bytes are laid out (deeper, but impressive to know):
 ---
 
 *End of handbook. Remember: **Protobuf = the compact typed contract; gRPC = fast streaming RPC over
-HTTP/2.** Field numbers are forever, and always set a deadline. 🔌*
+HTTP/2.** Field numbers are forever, and always set a deadline.*

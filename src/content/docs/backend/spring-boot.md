@@ -391,4 +391,4 @@ exception = no rollback.
 ---
 
 *End of handbook. The senior signal in Spring interviews is understanding **proxies, the bean lifecycle,
-and auto-configuration conditionals** — the "magic" is just `@Conditional` + proxies. 🍃*
+and auto-configuration conditionals** — the "magic" is just `@Conditional` + proxies.*

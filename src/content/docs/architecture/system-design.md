@@ -126,7 +126,7 @@ If servers are stateless, where do logins/sessions live? Options: a shared cache
 
 Caching stores hot data in fast memory to cut latency and database load. **It's the #1 scaling lever**
 — but it introduces *the two hardest problems in computer science: naming things, cache invalidation,
-and off-by-one errors.* 🙂
+and off-by-one errors.*
 
 ### Where caches live
 - **Client/browser cache**, **CDN** (static + edge), **application cache** (Redis/Memcached),
@@ -570,4 +570,4 @@ S3+CDN, ranking service for "top posts," and async pipelines for counts/notifica
 ---
 
 *End of handbook. Remember: there's no single right answer — interviewers want to see you reason about
-trade-offs at the right scale. Talk through the "why," not just the "what." 🏗️*
+trade-offs at the right scale. Talk through the "why," not just the "what."*

@@ -284,7 +284,7 @@ now **detached**, so the proxy can't hit the DB).
 
 ```java
 User u = repo.findById(1L);   // session closes here (in a non-transactional context)
-u.getOrders().size();         // 💥 LazyInitializationException — session gone
+u.getOrders().size();         // LazyInitializationException — session gone
 ```
 
 **Fixes (know several — a favorite follow-up):**
