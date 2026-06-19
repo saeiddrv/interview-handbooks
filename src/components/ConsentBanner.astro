@@ -1,0 +1,94 @@
+---
+// Google Analytics 4 with a GDPR-compliant consent gate.
+// Analytics does NOT load and NO cookies are set until the visitor clicks "Accept".
+// Replace the placeholder below with your real GA4 Measurement ID (looks like G-XXXXXXXXXX).
+const GA_ID = 'G-XXXXXXXXXX';
+---
+
+<div id="ih-consent" class="ih-consent" hidden>
+  <p class="ih-consent__text">
+    This site uses Google Analytics to understand which handbooks are useful.
+    Cookies are only set if you accept. See our
+    <a href="/privacy/">privacy notice</a>.
+  </p>
+  <div class="ih-consent__actions">
+    <button type="button" id="ih-consent-decline" class="ih-consent__btn ih-consent__btn--ghost">
+      Decline
+    </button>
+    <button type="button" id="ih-consent-accept" class="ih-consent__btn ih-consent__btn--primary">
+      Accept
+    </button>
+  </div>
+</div>
+
+<script is:inline define:vars={{ GA_ID }}>
+  (function () {
+    var KEY = 'ih-consent';
+    var stored = null;
+    try {
+      stored = localStorage.getItem(KEY);
+    } catch (e) {}
+
+    // Consent Mode v2: default everything to denied (no cookies, no tracking).
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    window.gtag = gtag;
+    gtag('consent', 'default', {
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied',
+      analytics_storage: 'denied',
+    });
+
+    function loadGA() {
+      if (window.__ihGaLoaded || !GA_ID || GA_ID.indexOf('G-XXXX') === 0) return;
+      window.__ihGaLoaded = true;
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
+      document.head.appendChild(s);
+      gtag('js', new Date());
+      gtag('config', GA_ID, { anonymize_ip: true });
+    }
+
+    function grant() {
+      gtag('consent', 'update', { analytics_storage: 'granted' });
+      loadGA();
+    }
+
+    var banner = document.getElementById('ih-consent');
+    // Move the banner to <body> so it escapes any transformed/contained
+    // ancestor (the footer column) and its fixed positioning + z-index win.
+    if (banner && banner.parentNode !== document.body) {
+      document.body.appendChild(banner);
+    }
+
+    if (stored === 'granted') {
+      grant();
+    } else if (stored === 'denied') {
+      // stay denied, no banner
+    } else if (banner) {
+      banner.hidden = false;
+    }
+
+    var accept = document.getElementById('ih-consent-accept');
+    var decline = document.getElementById('ih-consent-decline');
+    if (accept)
+      accept.addEventListener('click', function () {
+        try {
+          localStorage.setItem(KEY, 'granted');
+        } catch (e) {}
+        grant();
+        if (banner) banner.hidden = true;
+      });
+    if (decline)
+      decline.addEventListener('click', function () {
+        try {
+          localStorage.setItem(KEY, 'denied');
+        } catch (e) {}
+        if (banner) banner.hidden = true;
+      });
+  })();
+</script>

@@ -1,5 +1,6 @@
 ---
 import Default from '@astrojs/starlight/components/Footer.astro';
+import ConsentBanner from './ConsentBanner.astro';
 ---
 
 <Default><slot /></Default>
@@ -9,6 +10,7 @@ import Default from '@astrojs/starlight/components/Footer.astro';
     &copy; {new Date().getFullYear()}
     <a href="https://saeiddrv.com" target="_blank" rel="noopener">Saeid Darvishghazvini</a>
     &middot; Open source for the community &middot;
+    <a href="/privacy/">Privacy</a> &middot;
     <a
       href="https://github.com/saeiddrv/interview-handbooks/blob/main/LICENSE"
       target="_blank"
@@ -16,3 +18,5 @@ import Default from '@astrojs/starlight/components/Footer.astro';
     >
   </p>
 </div>
+
+<ConsentBanner />
