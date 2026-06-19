@@ -243,7 +243,8 @@ User → API (fast: "accepted") → Queue → Workers → DB / email / video tra
 
 **Delivery guarantees:**
 - **At-most-once** (may lose), **at-least-once** (may duplicate — make consumers **idempotent!**),
-  **exactly-once** (hard/expensive; usually approximated with idempotency + dedup keys).
+  **exactly-once** (hard/expensive; usually approximated with idempotency + dedup keys). (See the
+  Distributed Systems handbook for the deep treatment.)
 
 **Other must-knows:**
 - **Dead-letter queue (DLQ):** where messages go after repeated failures, for inspection.

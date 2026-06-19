@@ -1618,4 +1618,7 @@ SELECT query, calls, mean_exec_time FROM pg_stat_statements ORDER BY mean_exec_t
 
 ---
 
-*End of handbook. Good luck with your interview!*
+*End of handbook. The signal: master **MVCC** (readers don't block writers), index choice
+(**B-tree vs GIN/GiST/BRIN**), how to read `EXPLAIN (ANALYZE, BUFFERS)`, the locking and isolation
+levels, and the operational knobs (autovacuum, connection pooling, `pg_stat_statements`) — then you
+can reason about Postgres performance instead of guessing.*

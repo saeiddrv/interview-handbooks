@@ -515,3 +515,10 @@ kubectl port-forward svc/<s> 8080:80        kubectl config get-contexts
 - **Helm** packages; **Argo CD/Flux** do GitOps; **service mesh** does mTLS/traffic/observability.
 - **Common errors:** Pending (resources), CrashLoopBackOff (app/config), ImagePullBackOff (image/auth),
   OOMKilled (memory).
+
+---
+
+*End of handbook. The signal: Kubernetes is a **declarative control loop** — you describe desired
+state and controllers reconcile it. Know the **Pod → Deployment/StatefulSet → Service → Ingress**
+chain, **probes (liveness restarts, readiness gates traffic)**, requests/limits and autoscaling, and
+how to read the common failures (Pending, CrashLoopBackOff, ImagePullBackOff, OOMKilled).*

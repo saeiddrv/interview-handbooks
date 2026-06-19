@@ -337,3 +337,9 @@ docker stop/start/rm <c>         docker rmi <img>        docker system prune -a
 docker compose up -d             docker compose down -v
 docker volume ls                 docker network ls
 ```
+
+---
+
+*End of handbook. The signal: containers share the host kernel (cheap, fast) but isolate processes;
+**layers and a tight `.dockerfile`/build-cache** keep images small; **multi-stage builds, non-root
+users, and pinned base images** keep them secure — and Compose wires it together for local dev.*
