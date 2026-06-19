@@ -1,6 +1,7 @@
 # Interview Handbooks
 
-> Free, open-source interview handbooks for software engineers — **senior, staff & principal** level.
+> Free, open-source interview handbooks for software engineers — **senior, staff & principal** level,
+> with a backend focus on the **Java & Kotlin ecosystem**.
 
 [![Live site](https://img.shields.io/badge/Live-interview.saeiddrv.com-4f46e5?logo=cloudflare&logoColor=white)](https://interview.saeiddrv.com)
 [![Built with Starlight](https://img.shields.io/badge/Built%20with-Starlight-BC52EE?logo=astro&logoColor=white)](https://starlight.astro.build)
@@ -11,6 +12,12 @@ Clear explanations, real-world examples, the tricky points called out, and a cur
 **interview Q&A bank** with strong, ready-to-say answers — the depth real senior/staff/principal
 interviews actually probe, in one place.
 
+The content leans toward the **backend and the Java & Kotlin ecosystem** (JVM, Spring, persistence,
+messaging, distributed systems) plus the architecture, operations, and people skills that senior+
+rounds test. Even in the AI era, the fundamentals still decide the offer — AI can generate code, but
+it can't replace an engineer who **understands why**. Tools change; the principles you're hired to
+apply do not.
+
 **Read it live → [interview.saeiddrv.com](https://interview.saeiddrv.com)**
 
 Maintained by **[Saeid Darvishghazvini](https://saeiddrv.com)** for the community.
@@ -18,10 +25,12 @@ Found a fix? Click the **edit (pencil) button** on any page to open a pull reque
 
 ## Topics
 
-Data & Storage (PostgreSQL, Redis, Elasticsearch) · Messaging & APIs (Kafka vs RabbitMQ, gRPC) ·
-Backend (Spring Boot, Hibernate/JPA, JVM Internals) · Architecture & Infra (System Design,
-Microservices, Docker, Kubernetes, Nginx) · Security (OAuth2/JWT) · Tooling (Git) · AI/ML (LLM
-Engineering).
+Data & Storage (PostgreSQL, Redis, Elasticsearch) · Messaging & APIs (Kafka vs RabbitMQ, gRPC, API
+Design & GraphQL) · Backend (Spring Boot, Hibernate/JPA, JVM Internals, Java & Kotlin Data Structures,
+Java & Kotlin Concurrency) · Architecture & Infra (System Design, Distributed Systems, Microservices,
+Docker, Kubernetes, Nginx) · Operations & Quality (Observability & SRE, CI/CD, Testing) · Security
+(OAuth2/JWT) · Tooling (Git) · AI/ML (LLM Engineering) · Career & Leadership (Staff Behavioral, Soft
+Skills).
 
 ## Tech stack
 
