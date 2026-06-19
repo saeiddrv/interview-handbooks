@@ -46,7 +46,7 @@ export default defineConfig({
       sidebar: [
         { label: 'Data & Storage', items: ['data-storage/postgresql', 'data-storage/redis', 'data-storage/elasticsearch'] },
         { label: 'Messaging & APIs', items: ['messaging/kafka-vs-rabbitmq', 'messaging/grpc'] },
-        { label: 'Backend', items: ['backend/spring-boot', 'backend/hibernate-jpa', 'backend/jvm-internals'] },
+        { label: 'Backend', items: ['backend/spring-boot', 'backend/hibernate-jpa', 'backend/jvm-internals', 'backend/data-structures'] },
         { label: 'Architecture & Infra', items: ['architecture/system-design', 'architecture/distributed-systems', 'architecture/microservices', 'architecture/docker', 'architecture/kubernetes', 'architecture/nginx-load-balancing'] },
         { label: 'Security', items: ['security/oauth2-jwt'] },
         { label: 'Tooling', items: ['tooling/git'] },
