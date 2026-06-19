@@ -1,4 +1,9 @@
-# Java & Kotlin Internals — Interview Handbook
+---
+title: "Java & Kotlin Internals — Interview Handbook"
+description: "A complete, easy-to-understand guide to how Java & Kotlin really work: the JVM, memory management, garbage collection, compilers (javac, JIT, AOT,…"
+sidebar:
+  label: "JVM Internals"
+---
 
 > A complete, easy-to-understand guide to how Java & Kotlin really work: the JVM, memory management,
 > garbage collection, compilers (javac, JIT, AOT, GraalVM, kotlinc), JDK distributions, customizing

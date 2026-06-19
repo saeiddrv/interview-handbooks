@@ -1,4 +1,9 @@
-# Spring Boot — Advanced Interview Handbook
+---
+title: "Spring Boot — Advanced Interview Handbook"
+description: "A deep, easy-to-understand guide to Spring & Spring Boot for senior interviews: the IoC container, bean lifecycle, auto-configuration internals, AOP &…"
+sidebar:
+  label: "Spring Boot"
+---
 
 > A deep, easy-to-understand guide to Spring & Spring Boot for senior interviews: the IoC container,
 > bean lifecycle, auto-configuration internals, AOP & proxies, transactions, the tricky proxy/self-

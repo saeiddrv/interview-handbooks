@@ -1,4 +1,9 @@
-# System Design — Interview Handbook
+---
+title: "System Design — Interview Handbook"
+description: "A complete, easy-to-understand guide to designing large-scale systems: the building blocks, the patterns, the real problems you hit at scale, and how to…"
+sidebar:
+  label: "System Design"
+---
 
 > A complete, easy-to-understand guide to designing large-scale systems: the building blocks, the
 > patterns, the real problems you hit at scale, and how to answer the interview. Plain English,

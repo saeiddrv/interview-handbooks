@@ -1,4 +1,9 @@
-# OAuth 2.0, OIDC & JWT — Advanced Security Interview Handbook
+---
+title: "OAuth 2.0, OIDC & JWT — Advanced Security Interview Handbook"
+description: "A deep, easy-to-understand guide to modern auth for senior interviews: authentication vs authorization, OAuth 2.0 roles & flows (and why the…"
+sidebar:
+  label: "OAuth2 & JWT"
+---
 
 > A deep, easy-to-understand guide to modern auth for senior interviews: authentication vs
 > authorization, OAuth 2.0 roles & flows (and why the implicit/password grants are dead), OpenID

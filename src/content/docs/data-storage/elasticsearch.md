@@ -1,4 +1,9 @@
-# Elasticsearch — Advanced Interview Handbook
+---
+title: "Elasticsearch — Advanced Interview Handbook"
+description: "A deep, easy-to-understand guide to Elasticsearch for senior interviews: the inverted index, how search & relevance really work, shards & replicas, the…"
+sidebar:
+  label: "Elasticsearch"
+---
 
 > A deep, easy-to-understand guide to Elasticsearch for senior interviews: the inverted index, how
 > search & relevance really work, shards & replicas, the cluster, analyzers, mappings, query vs filter

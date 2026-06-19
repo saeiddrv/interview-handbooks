@@ -1,4 +1,9 @@
-# Nginx & Load Balancing — Advanced Interview Handbook
+---
+title: "Nginx & Load Balancing — Advanced Interview Handbook"
+description: "A deep, easy-to-understand guide to Nginx, reverse proxying, and load balancing for senior interviews: how Nginx's event model makes it fast, reverse…"
+sidebar:
+  label: "Nginx & Load Balancing"
+---
 
 > A deep, easy-to-understand guide to Nginx, reverse proxying, and load balancing for senior
 > interviews: how Nginx's event model makes it fast, reverse proxy vs forward proxy, every load-

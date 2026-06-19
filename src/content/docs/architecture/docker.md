@@ -1,4 +1,9 @@
-# Docker — Interview Handbook
+---
+title: "Docker — Interview Handbook"
+description: "Containers from the ground up: how Docker actually works, images & layers, the Dockerfile, building small secure images, networking, volumes, and Compose."
+sidebar:
+  label: "Docker"
+---
 
 > Containers from the ground up: how Docker actually works, images & layers, the Dockerfile,
 > building small secure images, networking, volumes, and Compose.

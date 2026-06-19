@@ -2,7 +2,7 @@
 
 [![Deploy site](https://github.com/saeiddrv/interview-handbooks/actions/workflows/deploy.yml/badge.svg)](https://github.com/saeiddrv/interview-handbooks/actions/workflows/deploy.yml)
 [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](LICENSE)
-[![Made with Material for MkDocs](https://img.shields.io/badge/Material_for-MkDocs-526CFE)](https://squidfunk.github.io/mkdocs-material/)
+[![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
 
 A free, open-source library of **senior, staff, and principal level** engineering interview
 handbooks — clear explanations, real examples, the tricky points called out, and a curated
@@ -19,27 +19,33 @@ Backend (Spring Boot, Hibernate/JPA, JVM Internals) · Architecture & Infra (Sys
 Microservices, Docker, Kubernetes, Nginx) · Security (OAuth2/JWT) · Tooling (Git) · AI/ML (LLM
 Engineering).
 
+## Tech stack
+
+Built with [Astro](https://astro.build) + [Starlight](https://starlight.astro.build) — fast,
+modern docs with built-in search, dark mode, and an edit-on-GitHub button.
+
 ## Run it locally
 
 ```bash
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-mkdocs serve            # live preview at http://127.0.0.1:8000
+npm install
+npm run dev             # live preview at http://localhost:4321/interview-handbooks/
 ```
 
 Build the static site:
 
 ```bash
-mkdocs build            # output in ./site
+npm run build           # output in ./dist
+npm run preview         # serve the production build
 ```
 
 ## Project layout
 
 ```
-docs/                 # the handbooks (Markdown, grouped by category)
-mkdocs.yml            # site config, theme, navigation
-requirements.txt      # mkdocs-material
-.github/workflows/    # auto-deploy to GitHub Pages on push to main
+src/content/docs/       # the handbooks (Markdown, grouped by category)
+src/components/         # Footer override (copyright)
+src/styles/            # brand colours
+astro.config.mjs       # site config, theme, sidebar nav
+.github/workflows/     # auto-deploy to GitHub Pages on push to main
 ```
 
 ## Contributing

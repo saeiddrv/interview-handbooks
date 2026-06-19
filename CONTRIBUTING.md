@@ -20,14 +20,16 @@ Highlight the high-value moments inline with **bold labels**:
 - `**Trap:**` — the common mistake that fails candidates.
 - `**Nice to know:**` — bonus depth.
 
-For bigger callouts you may use Material admonitions:
+For bigger callouts you may use Starlight asides:
 
 ```markdown
-!!! warning "Trap"
-    Explain the mistake and how to avoid it.
+:::caution[Trap]
+Explain the mistake and how to avoid it.
+:::
 
-!!! tip "Senior answer"
-    The line that sounds senior.
+:::tip[Senior answer]
+The line that sounds senior.
+:::
 ```
 
 ## Page structure
@@ -40,21 +42,31 @@ Each handbook follows the same shape:
 4. `## Interview Q&A` — questions as `**Q: ...**` with a blockquote answer.
 5. `## Cheat Sheet` — one-screen revision.
 
-> The right-hand table of contents is generated automatically — do **not** add a manual
-> "Table of Contents" section.
+> The right-hand "On this page" table of contents is generated automatically — do **not** add a
+> manual "Table of Contents" section, and do **not** add an `# H1` (the title comes from
+> frontmatter).
 
 ## Adding a new handbook
 
-1. Create `docs/<category>/<topic>.md` using a lowercase-kebab-case filename.
-2. Add it to the `nav:` section of `mkdocs.yml`.
-3. Run `mkdocs serve` and check it renders cleanly.
-4. Open a pull request.
+1. Create `src/content/docs/<category>/<topic>.md` using a lowercase-kebab-case filename.
+2. Add frontmatter at the top:
+   ```yaml
+   ---
+   title: "Topic — Interview Handbook"
+   description: "One line for search engines."
+   sidebar:
+     label: "Topic"
+   ---
+   ```
+3. It appears in the sidebar automatically (the nav autogenerates per category folder).
+4. Run `npm run dev` and check it renders cleanly.
+5. Open a pull request.
 
 ## Local preview
 
 ```bash
-pip install -r requirements.txt
-mkdocs serve
+npm install
+npm run dev
 ```
 
 By contributing you agree your contribution is licensed under the project's

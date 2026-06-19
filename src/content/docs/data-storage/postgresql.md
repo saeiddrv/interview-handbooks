@@ -1,4 +1,9 @@
-# PostgreSQL — Complete Interview Handbook
+---
+title: "PostgreSQL — Complete Interview Handbook"
+description: "A complete, unshortened study guide built from the ground up: simple explanations, real examples, optimizations, pros & cons, defaults, full interview…"
+sidebar:
+  label: "PostgreSQL"
+---
 
 > A complete, unshortened study guide built from the ground up: simple explanations, real
 > examples, optimizations, pros & cons, defaults, full interview Q&A, a MySQL comparison, and the

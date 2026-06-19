@@ -1,4 +1,9 @@
-# RabbitMQ & Kafka — Interview Handbook
+---
+title: "RabbitMQ & Kafka — Interview Handbook"
+description: "A complete, easy-to-understand guide to the two giants of messaging: RabbitMQ (the smart broker / message queue) and Apache Kafka (the distributed…"
+sidebar:
+  label: "Kafka vs RabbitMQ"
+---
 
 > A complete, easy-to-understand guide to the two giants of messaging: **RabbitMQ** (the smart broker /
 > message queue) and **Apache Kafka** (the distributed event-streaming log). How each really works, when

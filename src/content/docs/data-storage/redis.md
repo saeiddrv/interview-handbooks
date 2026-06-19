@@ -1,4 +1,9 @@
-# Redis — Interview Handbook
+---
+title: "Redis — Interview Handbook"
+description: "A complete, easy-to-understand guide to Redis: what it is, every data structure, persistence, eviction, clustering & replication, caching patterns,…"
+sidebar:
+  label: "Redis"
+---
 
 > A complete, easy-to-understand guide to Redis: what it is, every data structure, persistence,
 > eviction, clustering & replication, caching patterns, pub/sub & streams, distributed locks, the

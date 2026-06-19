@@ -1,0 +1,18 @@
+---
+import Default from '@astrojs/starlight/components/Footer.astro';
+---
+
+<Default><slot /></Default>
+
+<div class="ih-copyright">
+  <p>
+    &copy; {new Date().getFullYear()}
+    <a href="https://saeiddrv.com" target="_blank" rel="noopener">Saeid Darvish</a>
+    &middot; Open source for the community &middot;
+    <a
+      href="https://github.com/saeiddrv/interview-handbooks/blob/main/LICENSE"
+      target="_blank"
+      rel="noopener">CC BY-NC 4.0</a
+    >
+  </p>
+</div>

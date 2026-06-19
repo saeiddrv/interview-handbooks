@@ -1,4 +1,9 @@
-# gRPC & Protocol Buffers — Interview Handbook
+---
+title: "gRPC & Protocol Buffers — Interview Handbook"
+description: "A complete, easy-to-understand guide to gRPC (the high-performance RPC framework) and Protocol Buffers (its binary serialization): how they work, the four…"
+sidebar:
+  label: "gRPC & Protobuf"
+---
 
 > A complete, easy-to-understand guide to gRPC (the high-performance RPC framework) and Protocol
 > Buffers (its binary serialization): how they work, the four call types, HTTP/2 under the hood, schema

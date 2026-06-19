@@ -1,4 +1,9 @@
-# Microservices Patterns — Advanced Interview Handbook
+---
+title: "Microservices Patterns — Advanced Interview Handbook"
+description: "A deep, easy-to-understand guide to microservices for senior interviews: when (and when NOT) to use them, decomposition, the data problem, communication…"
+sidebar:
+  label: "Microservices"
+---
 
 > A deep, easy-to-understand guide to microservices for senior interviews: when (and when NOT) to use
 > them, decomposition, the data problem, communication patterns, distributed transactions (Saga,

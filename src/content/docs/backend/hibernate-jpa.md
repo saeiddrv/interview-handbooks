@@ -1,4 +1,9 @@
-# Hibernate & JPA — Interview Handbook
+---
+title: "Hibernate & JPA — Interview Handbook"
+description: "A complete, easy-to-understand guide to Hibernate (the leading JPA ORM): how it really works, the persistence context, entity lifecycle, mappings &…"
+sidebar:
+  label: "Hibernate & JPA"
+---
 
 > A complete, easy-to-understand guide to Hibernate (the leading JPA ORM): how it really works, the
 > persistence context, entity lifecycle, mappings & relationships, the infamous N+1 and

@@ -1,11 +1,13 @@
-# Site build output
-site/
+# Build output
+dist/
+.astro/
 
-# Python
-.venv/
-venv/
-__pycache__/
-*.pyc
+# Dependencies
+node_modules/
+
+# Env
+.env
+.env.production
 
 # OS / editor
 .DS_Store

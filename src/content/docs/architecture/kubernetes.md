@@ -1,4 +1,9 @@
-# Kubernetes — Interview Handbook
+---
+title: "Kubernetes — Interview Handbook"
+description: "Container orchestration top to bottom: architecture, the core objects (Pod, Deployment, Service), controllers, networking & Ingress, config & secrets,…"
+sidebar:
+  label: "Kubernetes"
+---
 
 > Container orchestration top to bottom: architecture, the core objects (Pod, Deployment, Service),
 > controllers, networking & Ingress, config & secrets, storage, scaling, health & rollouts,

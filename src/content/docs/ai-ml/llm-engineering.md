@@ -1,4 +1,9 @@
-# LLM Engineering — Interview Handbook
+---
+title: "LLM Engineering — Interview Handbook"
+description: "A complete, interview-focused guide to the modern LLM application stack: Prompt Engineering · RAG · LLM Code Agents · MCP Servers. Real concepts, real…"
+sidebar:
+  label: "LLM Engineering"
+---
 
 > A complete, interview-focused guide to the modern LLM application stack:
 > **Prompt Engineering · RAG · LLM Code Agents · MCP Servers.**

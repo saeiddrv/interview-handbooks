@@ -1,4 +1,9 @@
-# Git — Complete Mastery Handbook
+---
+title: "Git — Complete Mastery Handbook"
+description: "A complete, unshortened guide to Git: from how it works under the hood to the most advanced real-world usage — branching, rebasing, worktrees, submodules,…"
+sidebar:
+  label: "Git"
+---
 
 > A complete, unshortened guide to Git: from how it works under the hood to the most advanced
 > real-world usage — branching, rebasing, worktrees, submodules, hooks, recovery, team workflows,
