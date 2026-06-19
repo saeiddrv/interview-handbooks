@@ -29,6 +29,7 @@ import { CardGrid, LinkCard } from '@astrojs/starlight/components';
 <CardGrid>
   <LinkCard title="Kafka vs RabbitMQ" href="messaging/kafka-vs-rabbitmq/" description="Log vs broker, delivery semantics, ordering, when to use which." />
   <LinkCard title="gRPC & Protobuf" href="messaging/grpc/" description="IDL, wire format, streaming, backward compatibility." />
+  <LinkCard title="API Design & GraphQL" href="messaging/api-design/" description="REST, versioning, idempotency, pagination, GraphQL, gRPC tradeoffs." />
 </CardGrid>
 
 #### Backend
@@ -37,6 +38,7 @@ import { CardGrid, LinkCard } from '@astrojs/starlight/components';
   <LinkCard title="Hibernate & JPA" href="backend/hibernate-jpa/" description="Entity lifecycle, lazy loading, N+1, caching, transactions." />
   <LinkCard title="JVM Internals" href="backend/jvm-internals/" description="Memory model, GC, class loading, concurrency (Java & Kotlin)." />
   <LinkCard title="Java & Kotlin Data Structures" href="backend/data-structures/" description="Collections internals, complexity, versions, HashMap vs TreeMap, Kotlin sequences." />
+  <LinkCard title="Java & Kotlin Concurrency" href="backend/concurrency/" description="Memory model, locks, atomics, executors, virtual threads, coroutines." />
 </CardGrid>
 
 #### Architecture & Infrastructure
@@ -56,7 +58,15 @@ import { CardGrid, LinkCard } from '@astrojs/starlight/components';
   <LinkCard title="LLM Engineering" href="ai-ml/llm-engineering/" description="Prompting, RAG, agents, evaluation, production concerns." />
 </CardGrid>
 
+#### Operations & Quality
+<CardGrid>
+  <LinkCard title="Observability & SRE" href="operations/observability-sre/" description="Metrics/logs/traces, SLO/SLI, error budgets, RED/USE, incidents." />
+  <LinkCard title="CI/CD & Deployment" href="operations/cicd/" description="Pipelines, blue-green/canary, feature flags, migrations, DORA." />
+  <LinkCard title="Testing Strategy" href="operations/testing/" description="Test pyramid, doubles, flaky tests, contract testing, coverage myths." />
+</CardGrid>
+
 #### Career & Leadership
 <CardGrid>
   <LinkCard title="Staff Behavioral & Leadership" href="career/staff-leadership/" description="Scope, influence without authority, STAR stories, judgment, incidents." />
+  <LinkCard title="Soft Skills & Communication" href="career/soft-skills/" description="Communication, feedback, conflict, collaboration, mentoring." />
 </CardGrid>

@@ -89,9 +89,10 @@ The line that sounds senior.
 5. Build and verify (see below).
 
 ### Topics worth adding next (senior → principal coverage gaps)
-Observability/SRE, CI/CD, Terraform/IaC, API design & GraphQL, concurrency, cloud/AWS, testing
-strategy. (Distributed-systems theory and staff behavioral/leadership are now covered.) Ship each
-as its own PR.
+Terraform/IaC, cloud/AWS, security threat-modeling, performance engineering, data engineering. (Now
+covered: distributed-systems theory, staff behavioral/leadership, Java/Kotlin data structures &
+concurrency, API design & GraphQL, observability/SRE, CI/CD, testing strategy, soft skills.) Ship
+each as its own PR.
 
 ## How to EDIT an existing topic
 
