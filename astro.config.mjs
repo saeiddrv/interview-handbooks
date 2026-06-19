@@ -41,8 +41,7 @@ export default defineConfig({
         },
       ],
       editLink: {
-        baseUrl:
-          'https://github.com/saeiddrv/interview-handbooks/edit/main/src/content/docs/',
+        baseUrl: 'https://github.com/saeiddrv/interview-handbooks/edit/main/',
       },
       sidebar: [
         { label: 'Data & Storage', items: ['data-storage/postgresql', 'data-storage/redis', 'data-storage/elasticsearch'] },
