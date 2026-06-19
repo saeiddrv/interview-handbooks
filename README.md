@@ -18,6 +18,10 @@ rounds test. Even in the AI era, the fundamentals still decide the offer — AI 
 it can't replace an engineer who **understands why**. Tools change; the principles you're hired to
 apply do not.
 
+The handbooks are **written from real engineering experience and refined, fact-checked, and
+consistency-edited with the help of AI** — keeping explanations clear, examples correct, and the
+style uniform across the library.
+
 **Read it live → [interview.saeiddrv.com](https://interview.saeiddrv.com)**
 
 Maintained by **[Saeid Darvishghazvini](https://saeiddrv.com)** for the community.
