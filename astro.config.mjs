@@ -49,7 +49,7 @@ export default defineConfig({
         { label: 'Backend', items: ['backend/spring-boot', 'backend/ktor', 'backend/hibernate-jpa', 'backend/jvm-internals', 'backend/language-tricky-points', 'backend/data-structures', 'backend/algorithms', 'backend/concurrency', 'backend/async-reactive'] },
         { label: 'Architecture & Infra', items: ['architecture/system-design', 'architecture/distributed-systems', 'architecture/microservices', 'architecture/docker', 'architecture/kubernetes', 'architecture/nginx-load-balancing'] },
         { label: 'Operations & Quality', items: ['operations/observability-sre', 'operations/cicd', 'operations/testing'] },
-        { label: 'Security', items: ['security/oauth2-jwt'] },
+        { label: 'Security', items: ['security/oauth2-jwt', 'security/secure-coding'] },
         { label: 'Tooling', items: ['tooling/git'] },
         { label: 'AI / ML', items: ['ai-ml/llm-engineering'] },
         { label: 'Career & Leadership', items: ['career/staff-leadership', 'career/soft-skills'] },
