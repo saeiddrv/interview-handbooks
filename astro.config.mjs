@@ -46,7 +46,7 @@ export default defineConfig({
       sidebar: [
         { label: 'Data & Storage', items: ['data-storage/postgresql', 'data-storage/redis', 'data-storage/elasticsearch'] },
         { label: 'Messaging & APIs', items: ['messaging/kafka-vs-rabbitmq', 'messaging/grpc', 'messaging/api-design'] },
-        { label: 'Backend', items: ['backend/spring-boot', 'backend/ktor', 'backend/hibernate-jpa', 'backend/jvm-internals', 'backend/data-structures', 'backend/algorithms', 'backend/concurrency'] },
+        { label: 'Backend', items: ['backend/spring-boot', 'backend/ktor', 'backend/hibernate-jpa', 'backend/jvm-internals', 'backend/data-structures', 'backend/algorithms', 'backend/concurrency', 'backend/async-reactive'] },
         { label: 'Architecture & Infra', items: ['architecture/system-design', 'architecture/distributed-systems', 'architecture/microservices', 'architecture/docker', 'architecture/kubernetes', 'architecture/nginx-load-balancing'] },
         { label: 'Operations & Quality', items: ['operations/observability-sre', 'operations/cicd', 'operations/testing'] },
         { label: 'Security', items: ['security/oauth2-jwt'] },

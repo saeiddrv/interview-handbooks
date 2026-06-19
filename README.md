@@ -23,15 +23,6 @@ apply do not.
 Maintained by **[Saeid Darvishghazvini](https://saeiddrv.com)** for the community.
 Found a fix? Click the **edit (pencil) button** on any page to open a pull request.
 
-## Topics
-
-Data & Storage (PostgreSQL, Redis, Elasticsearch) · Messaging & APIs (Kafka vs RabbitMQ, gRPC, API
-Design & GraphQL) · Backend (Spring Boot, Hibernate/JPA, JVM Internals, Java & Kotlin Data Structures,
-Java & Kotlin Concurrency) · Architecture & Infra (System Design, Distributed Systems, Microservices,
-Docker, Kubernetes, Nginx) · Operations & Quality (Observability & SRE, CI/CD, Testing) · Security
-(OAuth2/JWT) · Tooling (Git) · AI/ML (LLM Engineering) · Career & Leadership (Staff Behavioral, Soft
-Skills).
-
 ## Tech stack
 
 Built with [Astro](https://astro.build) + [Starlight](https://starlight.astro.build) — fast,
