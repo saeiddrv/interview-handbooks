@@ -1,12 +1,13 @@
 ---
 title: "Java & Kotlin Concurrency — Advanced Interview Handbook"
-description: "Concurrency in Java and Kotlin made clear and deep: race conditions, the Java Memory Model (happens-before, volatile), synchronized vs atomics/CAS, locks, executors and thread pools, CompletableFuture, virtual threads (Loom), and Kotlin coroutines/Flow — with tricks, traps, and a Q&A bank."
+description: "Concurrency in Java and Kotlin made clear and deep: race conditions, the Java Memory Model (happens-before, volatile), synchronized vs atomics/CAS, locks, wait/notify and synchronizers (latch/barrier/semaphore), executors and thread pools, CompletableFuture, virtual threads (Loom), and Kotlin coroutines/Flow — with tricks, traps, and a Q&A bank."
 sidebar:
   label: "Java & Kotlin Concurrency"
 ---
 
 > Concurrency without the fog: what actually makes it hard, the Java Memory Model (happens-before,
-> visibility vs atomicity, volatile), synchronized vs atomics and CAS, the lock family, executors and
+> visibility vs atomicity, volatile), synchronized vs atomics and CAS, the lock family, **wait/notify
+> and the synchronizers** (latch, barrier, semaphore), executors and
 > thread-pool sizing, Future/CompletableFuture, virtual threads (Project Loom), and Kotlin coroutines,
 > structured concurrency, and Flow — explained simply, with the tricks and traps interviewers probe,
 > plus a Q&A bank.
@@ -40,15 +41,25 @@ passing.
 
 A `Thread` maps to an **OS thread** — roughly **1 MB** of stack and a kernel-scheduled context. They're
 *expensive*: creating thousands, or blocking many on I/O, wastes memory and causes context-switch
-overhead. This is exactly the pain that **virtual threads** (§13) and **coroutines** (§14) solve.
+overhead. This is exactly the pain that **virtual threads** (§15) and **coroutines** (§16) solve.
 
 ```java
 Thread t = new Thread(() -> work());
 t.start();   // runs concurrently
-t.join();    // wait for it
+t.join();    // wait for it to finish (caller blocks)
 ```
 
-Rule: **don't manage raw threads** in app code — use an `ExecutorService` (§8) or higher-level
+**Thread states** (`Thread.State`, common interview question):
+`NEW` → `RUNNABLE` (running or ready) → `BLOCKED` (waiting to enter a `synchronized` monitor) /
+`WAITING` (in `wait()`/`join()`/`park()` with no timeout) / `TIMED_WAITING` (`sleep(t)`,
+`wait(t)`) → `TERMINATED`. Note **BLOCKED** (can't get a lock) is distinct from **WAITING**
+(voluntarily parked until signalled).
+
+**Daemon vs user threads:** the JVM exits when all **user** (non-daemon) threads finish — **daemon**
+threads (e.g. GC, background workers via `t.setDaemon(true)`) don't keep it alive and are abruptly
+stopped at shutdown (so don't hold critical state in them).
+
+Rule: **don't manage raw threads** in app code — use an `ExecutorService` (§10) or higher-level
 abstractions.
 
 ---
@@ -150,7 +161,72 @@ finally { lock.unlock(); }   // never skip this
 
 ---
 
-## 8. Executors & Thread Pools
+## 8. Inter-Thread Coordination: wait / notify (and sleep vs wait)
+
+Locks give **mutual exclusion**; `wait`/`notify` give **signalling** — one thread waits for a condition
+another thread will make true (the low-level basis of producer/consumer). They operate on an object's
+**monitor**, so you must hold the lock (`synchronized`) to call them.
+
+```java
+synchronized (queue) {
+    while (queue.isEmpty())     // ALWAYS wait in a loop, never an if
+        queue.wait();           // releases the monitor + parks; re-acquires on wake
+    return queue.remove();
+}
+// producer side:
+synchronized (queue) { queue.add(item); queue.notifyAll(); }   // wake waiters
+```
+
+- **Wait in a `while`, not an `if`** — guards against **spurious wakeups** and the condition changing
+  before the woken thread re-acquires the lock. The single most common `wait/notify` bug.
+- **`notify` vs `notifyAll`** — `notify` wakes **one** arbitrary waiter (risk: wakes the wrong one and a
+  signal is lost); `notifyAll` wakes all and lets each re-check. **Prefer `notifyAll`** unless you've
+  proven a single condition with one waiter.
+- **`sleep()` vs `wait()`** (classic question): `Thread.sleep(t)` is static, pauses the current thread
+  and **keeps every lock it holds**; `wait()` is called on an object, **releases that monitor**, and
+  resumes only when notified (or timed out / interrupted). Use `sleep` for delays, `wait` for
+  coordination.
+- **`Condition`** (on a `ReentrantLock`) is the modern equivalent: `await()`/`signal()`/`signalAll()`,
+  with **multiple wait-sets per lock** (e.g. separate "not full" and "not empty" conditions).
+
+> **Senior answer:** "In real code I rarely hand-write `wait/notify` — I use a `BlockingQueue` or a
+> higher-level synchronizer, which encapsulate the guarded-loop correctly. But I can explain the
+> primitive: wait in a loop, release the monitor, prefer `notifyAll`, and remember `sleep` holds locks
+> while `wait` releases them."
+
+---
+
+## 9. Synchronizers (java.util.concurrent)
+
+Ready-made coordination tools — prefer these over hand-rolled `wait/notify`:
+
+- **CountDownLatch** — a **one-shot** gate: threads `await()` until a counter hits zero
+  (`countDown()`). Use for "wait until N tasks/services are ready" or fan-out/fan-in. **Not reusable.**
+- **CyclicBarrier** — N threads wait for **each other** at a barrier, then all proceed; **reusable**
+  (resets each cycle). Use for phased parallel computation. (Latch waits for *events*; barrier waits for
+  *each other*.)
+- **Semaphore** — holds N **permits** (`acquire`/`release`) — a throttle/bounded pool (e.g. limit
+  concurrent DB connections or in-flight requests). A binary semaphore (1 permit) is a non-reentrant
+  lock-like primitive.
+- **Phaser** — a flexible, **reusable** multi-phase barrier with dynamic party registration (a more
+  capable CyclicBarrier).
+- **Exchanger** — two threads meet and **swap** objects at a rendezvous point.
+
+```java
+CountDownLatch ready = new CountDownLatch(3);
+// workers: ready.countDown();   main: ready.await();   // proceeds once all 3 done
+
+Semaphore permits = new Semaphore(10);
+permits.acquire(); try { callService(); } finally { permits.release(); }
+```
+
+> **Trap:** `CountDownLatch` vs `CyclicBarrier` — latch is **one-shot** and threads wait for an event
+> count to reach zero; barrier is **reusable** and threads wait for **one another**. Mixing them up is a
+> classic miss.
+
+---
+
+## 10. Executors & Thread Pools
 
 **Never** create threads per task. Submit tasks to an `ExecutorService` that reuses a bounded pool.
 
@@ -173,7 +249,15 @@ Pool sizing rule of thumb:
 
 ---
 
-## 9. Future & CompletableFuture
+**Fork/Join & parallel streams:** `ForkJoinPool` powers **divide-and-conquer** parallelism via
+**work-stealing** (idle threads steal tasks from busy threads' queues) — great for recursive,
+CPU-bound splitting (`RecursiveTask`). Java 8 **parallel streams** (`list.parallelStream()`) run on the
+shared **common pool**. **Trap:** parallel streams use that shared pool, so a blocking or long task in
+one starves all others — only use them for CPU-bound, side-effect-free work on large datasets.
+
+---
+
+## 11. Future & CompletableFuture
 
 `Future` (Java 5) represents a pending result but only offers blocking `get()`. **CompletableFuture**
 (Java 8) is composable, non-blocking async:
@@ -193,7 +277,7 @@ CompletableFuture.supplyAsync(() -> fetchUser(id), pool)
 
 ---
 
-## 10. Concurrent Collections (quick recall)
+## 12. Concurrent Collections (quick recall)
 
 `ConcurrentHashMap` (per-bucket CAS + synchronized, no nulls, atomic `computeIfAbsent`/`merge`),
 `CopyOnWriteArrayList` (read-mostly), `ConcurrentSkipListMap` (sorted), and the **BlockingQueue** family
@@ -202,7 +286,7 @@ over `synchronized` wrappers. (See the Data Structures handbook for internals.)
 
 ---
 
-## 11. The Classic Bugs
+## 13. The Classic Bugs
 
 - **Deadlock** — two threads each hold a lock the other needs. **Prevent** with a global **lock
   ordering** (always acquire A before B), `tryLock` with timeout, or fewer locks.
@@ -217,7 +301,7 @@ over `synchronized` wrappers. (See the Data Structures handbook for internals.)
 
 ---
 
-## 12. Thread-Safety Strategies (in order of preference)
+## 14. Thread-Safety Strategies (in order of preference)
 
 1. **Don't share** — confine state to one thread (e.g. `ThreadLocal`, or per-request objects).
 2. **Immutability** — immutable objects are inherently thread-safe (no writes to race). Records / `final`
@@ -230,7 +314,7 @@ leaks in thread pools (threads are reused; always `remove()`).
 
 ---
 
-## 13. Virtual Threads (Project Loom, Java 21)
+## 15. Virtual Threads (Project Loom, Java 21)
 
 The headline modern feature. **Virtual threads** are lightweight threads scheduled by the JVM onto a
 small pool of OS "carrier" threads. Blocking a virtual thread (on I/O) **parks it cheaply** and frees
@@ -254,7 +338,7 @@ try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
 
 ---
 
-## 14. Kotlin Coroutines
+## 16. Kotlin Coroutines
 
 Kotlin's answer to async: **coroutines** are *suspendable computations* — extremely cheap (not OS
 threads), with **structured concurrency** baked in.
@@ -291,7 +375,7 @@ operators (`map`, `filter`, `buffer`, `flatMapMerge`), collected with `.collect`
 
 ---
 
-## 15. Coroutines vs Threads vs Virtual Threads
+## 17. Coroutines vs Threads vs Virtual Threads
 
 | | OS Threads | Virtual Threads (Loom) | Kotlin Coroutines |
 |---|---|---|---|
@@ -308,7 +392,7 @@ operators (`map`, `filter`, `buffer`, `flatMapMerge`), collected with `.collect`
 
 ---
 
-## 16. Tricks, Traps & Gotchas
+## 18. Tricks, Traps & Gotchas
 
 - **Double-checked locking** needs `volatile` on the field, or the half-constructed object can leak.
 - **False sharing** — two hot variables on the same cache line cause cache-line ping-pong; pad or use
@@ -322,7 +406,7 @@ operators (`map`, `filter`, `buffer`, `flatMapMerge`), collected with `.collect`
 
 ---
 
-## 17. Interview Q&A Bank
+## 19. Interview Q&A Bank
 
 **Q: What are the three concerns of thread safety?**
 > Atomicity, visibility, ordering. Locks give all three; volatile gives visibility/ordering but not
@@ -336,6 +420,25 @@ operators (`map`, `filter`, `buffer`, `flatMapMerge`), collected with `.collect`
 > A rule set defining when one thread's writes are visible to another. Edges come from program order,
 > monitor lock/unlock, volatile read/write, thread start/join, final fields. No edge → no visibility
 > guarantee.
+
+**Q: sleep() vs wait()?**
+> `sleep(t)` is static, pauses the current thread, and keeps all held locks. `wait()` is called on an
+> object, releases that monitor, and resumes only on notify/timeout/interrupt. `sleep` for delays, `wait`
+> for coordination.
+
+**Q: Why call wait() in a loop, and notify vs notifyAll?**
+> Loop (while) re-checks the condition to handle spurious wakeups and state changing before re-acquiring
+> the lock. Prefer notifyAll so the right waiter re-checks; notify can wake the wrong thread and lose the
+> signal.
+
+**Q: CountDownLatch vs CyclicBarrier?**
+> Latch is one-shot: threads await until a counter reaches zero (wait for events). Barrier is reusable:
+> N threads wait for each other, then all proceed (wait for one another). Use Semaphore to throttle
+> concurrent access via permits.
+
+**Q: BLOCKED vs WAITING thread state?**
+> BLOCKED = waiting to acquire a synchronized monitor. WAITING/TIMED_WAITING = voluntarily parked in
+> wait/join/sleep/park until signalled or timed out.
 
 **Q: synchronized vs ReentrantLock?**
 > Both reentrant mutual exclusion. ReentrantLock adds tryLock/timeout, interruptibility, fairness, and
@@ -377,7 +480,7 @@ operators (`map`, `filter`, `buffer`, `flatMapMerge`), collected with `.collect`
 
 ---
 
-## 18. Cheat Sheet
+## 20. Cheat Sheet
 
 - **3 concerns:** atomicity, visibility, ordering. Cheapest fix: **don't share mutable state**
   (immutability/confinement/messages).
@@ -387,8 +490,17 @@ operators (`map`, `filter`, `buffer`, `flatMapMerge`), collected with `.collect`
   guarantee.
 - **Locks:** ReentrantLock (tryLock/timeout/fairness, unlock in finally), ReadWriteLock,
   StampedLock (optimistic reads).
+- **Coordination:** `wait`/`notify` on a monitor — **wait in a `while` loop**, prefer **`notifyAll`**;
+  **`sleep` keeps locks, `wait` releases** them; `Condition` = modern equivalent on a Lock.
+- **Synchronizers:** **CountDownLatch** (one-shot, wait for events) · **CyclicBarrier** (reusable, wait
+  for each other) · **Semaphore** (N permits = throttle) · Phaser · Exchanger — prefer these over raw
+  wait/notify.
 - **Pools:** reuse via ExecutorService; size CPU≈cores, I/O larger; **bound the queue + rejection
   policy**; avoid the unbounded factory methods; supply your own executor to CompletableFuture.
+  **Fork/Join** = work-stealing divide-and-conquer; parallel streams share the common pool (don't block
+  them).
+- **Thread states:** NEW → RUNNABLE → BLOCKED (lock) / WAITING / TIMED_WAITING → TERMINATED; **daemon**
+  threads don't keep the JVM alive.
 - **CompletableFuture:** thenApply/Compose/Combine, allOf/anyOf, exceptionally.
 - **Bugs:** deadlock (lock ordering + tryLock), livelock (backoff), starvation (fairness), races
   (atomicity), thread leaks (shutdown/timeouts).
