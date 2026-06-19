@@ -9,8 +9,8 @@ export default defineConfig({
     starlight({
       title: 'Interview Handbooks',
       description:
-        'A free, open-source library of senior, staff, and principal level engineering interview handbooks.',
-      tagline: 'Senior · Staff · Principal interview prep',
+        'A free, open-source library of senior, staff, and principal level software engineering interview handbooks.',
+      tagline: 'Interview prep for software engineers · Senior · Staff · Principal',
       lastUpdated: true,
       favicon: '/favicon.svg',
       head: [
