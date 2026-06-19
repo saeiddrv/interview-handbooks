@@ -1,15 +1,20 @@
 # Interview Handbooks
 
+> Free, open-source interview handbooks for software engineers — **senior, staff & principal** level.
+
+[![Live site](https://img.shields.io/badge/Live-interview.saeiddrv.com-4f46e5?logo=cloudflare&logoColor=white)](https://interview.saeiddrv.com)
+[![Built with Starlight](https://img.shields.io/badge/Built%20with-Starlight-BC52EE?logo=astro&logoColor=white)](https://starlight.astro.build)
 [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](LICENSE)
-[![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-22c55e.svg)](CONTRIBUTING.md)
 
-A free, open-source library of **senior, staff, and principal level** engineering interview
-handbooks — clear explanations, real examples, the tricky points called out, and a curated
-**interview Q&A bank** with strong, ready-to-say answers.
+Clear explanations, real-world examples, the tricky points called out, and a curated
+**interview Q&A bank** with strong, ready-to-say answers — the depth real senior/staff/principal
+interviews actually probe, in one place.
 
-**Live site:** https://interview.saeiddrv.com
+**Read it live → [interview.saeiddrv.com](https://interview.saeiddrv.com)**
 
 Maintained by **[Saeid Darvishghazvini](https://saeiddrv.com)** for the community.
+Found a fix? Click the **edit (pencil) button** on any page to open a pull request.
 
 ## Topics
 
@@ -27,7 +32,7 @@ modern docs with built-in search, dark mode, and an edit-on-GitHub button.
 
 ```bash
 npm install
-npm run dev             # live preview at http://localhost:4321/interview-handbooks/
+npm run dev             # live preview at http://localhost:4321/
 ```
 
 Build the static site:
