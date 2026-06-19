@@ -1,0 +1,5 @@
+# Normalize line endings
+* text=auto eol=lf
+
+# Treat docs as documentation on GitHub (better language stats)
+docs/**/*.md linguist-documentation
