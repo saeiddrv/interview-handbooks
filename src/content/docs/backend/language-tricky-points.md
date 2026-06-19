@@ -1,12 +1,14 @@
 ---
 title: "Java & Kotlin Language Tricky Points — Advanced Interview Handbook"
-description: "The low-level language details interviewers probe: the Object/Any class and which methods you can override, equals vs == (and Kotlin == vs ===), the equals/hashCode contract, String immutability and the string pool/interning, the Integer cache and autoboxing traps, clone vs copy (shallow vs deep), pass-by-value, and serialization (Serializable, serialVersionUID, transient, kotlinx.serialization) — with a Q&A bank."
+description: "The low-level language details interviewers probe: access modifiers/visibility (Java vs Kotlin), the Object/Any class and which methods you can override, inheritance and static tricks (override vs overload vs hide), equals vs == (and Kotlin == vs ===), the equals/hashCode contract, String immutability and the string pool/interning, the Integer cache and autoboxing traps, clone vs copy (shallow vs deep), pass-by-value, and serialization (Serializable, serialVersionUID, transient, kotlinx.serialization) — with a Q&A bank."
 sidebar:
   label: "Language Tricky Points"
 ---
 
-> The low-level Java/Kotlin details that trip people up and that interviewers love: the **Object (Java)
-> / Any (Kotlin)** root class and **which methods you can override and why**, **`equals` vs `==`** (and
+> The low-level Java/Kotlin details that trip people up and that interviewers love: **access modifiers
+> (Java vs Kotlin)**, the **Object (Java) / Any (Kotlin)** root class and **which methods you can
+> override and why**, **inheritance tricks** (override vs overload vs hide) and **how `static` dodges
+> polymorphism**, **`equals` vs `==`** (and
 > Kotlin's **`==` vs `===`**), the **`equals`/`hashCode` contract**, **String immutability**, the
 > **string pool & interning**, the **Integer cache** and autoboxing traps, **`clone` vs copy** (shallow
 > vs deep), **pass-by-value**, and **serialization** — explained simply with the gotchas, plus a Q&A
@@ -25,8 +27,8 @@ is a classic question:
 | `equals(Object)` | **Yes** | Logical equality |
 | `hashCode()` | **Yes** | Hash bucket / must match `equals` |
 | `toString()` | **Yes** | Human-readable form |
-| `clone()` | Yes (protected) | Shallow copy (discouraged — §8) |
-| `finalize()` | Yes (**deprecated**) | Pre-GC cleanup (don't — §11) |
+| `clone()` | Yes (protected) | Shallow copy (discouraged — §11) |
+| `finalize()` | Yes (**deprecated**) | Pre-GC cleanup (don't — §14) |
 | `getClass()` | **No (final)** | Runtime class |
 | `wait()/notify()/notifyAll()` | **No (final)** | Thread coordination (see Concurrency handbook) |
 
@@ -41,7 +43,112 @@ to coroutines instead of low-level monitors.
 
 ---
 
-## 2. equals() — Reference vs Value Equality
+## 2. Access Modifiers & Visibility
+
+Who can see a class, method, or field. **Java has four levels** (note the default is *not* public):
+
+| Modifier | Same class | Same package | Subclass (other pkg) | Everywhere |
+|---|---|---|---|---|
+| `private` | Yes | No | No | No |
+| *(none = package-private)* | Yes | **Yes** | No | No |
+| `protected` | Yes | Yes | **Yes** | No |
+| `public` | Yes | Yes | Yes | **Yes** |
+
+- **Default = package-private** (no keyword) — the most-forgotten level; visible within the same package
+  only.
+- **`protected`** = package **+** subclasses (even in other packages) — broader than people think.
+- **Top-level classes** can only be `public` or package-private (not `private`/`protected`); only
+  **nested** classes can be `private`/`protected`.
+- **Encapsulation rule:** fields `private`, expose via methods. Public mutable fields leak invariants.
+
+**Kotlin has four levels too — but different ones** (and a different default):
+
+| Modifier | Visibility |
+|---|---|
+| `public` *(default)* | Everywhere |
+| `internal` | Same **module** (compilation unit) |
+| `protected` | Class **+ subclasses** (NOT the package) |
+| `private` | Class — or **file**, for top-level declarations |
+
+Key Java→Kotlin differences (classic question):
+- **Default is `public`** in Kotlin (vs package-private in Java).
+- **No package-private**; Kotlin replaces it with **`internal`** (module-scoped) — great for library APIs.
+- **`protected` does NOT include the package** in Kotlin (subclasses only).
+- **Top-level `private`** means **file-private**.
+
+> **Senior answer:** "The trap is the defaults: Java defaults to **package-private**, Kotlin to
+> **public**. And Kotlin swaps Java's package-private for **`internal`** (module visibility) and narrows
+> `protected` to subclasses only. I keep fields private and expose the minimum."
+
+---
+
+## 3. Inheritance & Polymorphism Tricks
+
+The small rules everyone is expected to know:
+
+- **Override vs overload:** **override** = same signature in a subclass → **runtime** polymorphism
+  (dispatch on the object's actual type). **Overload** = same name, different parameters → resolved at
+  **compile time** by the **declared (static) type** of the argument. Always use **`@Override`** so the
+  compiler catches a mistyped signature (which would silently become an overload).
+- **Fields are NOT polymorphic** — they're **hidden**, not overridden. `Parent p = new Child();
+  p.field` uses **Parent's** field (resolved by the reference type), while `p.method()` uses Child's
+  override. Access fields through getters to avoid this.
+- **`private` methods are not virtual** — they can't be overridden; a same-named subclass method is
+  unrelated (effectively `final`).
+- **Covariant return types** — an override may return a **subtype** of the parent's return type (Java 5+).
+- **`final`** stops it: `final` method = no override; `final` class = no subclassing (e.g. `String`).
+  **`abstract`** = can't instantiate; abstract methods must be implemented.
+- **Constructors aren't inherited.** A subclass constructor implicitly calls `super()` first; if the
+  parent has **no no-arg constructor**, the child **must** call `super(args)` explicitly.
+- **Initialization order** (a favorite trap): on `new Child()` → **super constructor runs before the
+  child's fields are initialized**. So calling an **overridable method from a constructor** sees the
+  child override running **before** the child's fields exist → it reads `null`/defaults. **Never call
+  overridable methods from a constructor.**
+- **Kotlin flips the default:** classes and methods are **`final` by default** — you must mark them
+  **`open`** to allow subclassing/overriding, and **`override` is mandatory**. Plus `sealed` classes for
+  closed hierarchies. (This is Kotlin enforcing "design for inheritance or prohibit it.")
+
+> **Trap:** `Parent p = new Child(); p.staticOrField` resolves by the **reference type**, but
+> `p.instanceMethod()` resolves by the **object type**. Methods are polymorphic; **fields and `static`
+> methods are not.**
+
+---
+
+## 4. static — and How It Interacts with Inheritance
+
+**`static` members belong to the class, not instances** — one shared copy for all objects.
+
+- **Static methods are *hidden*, not overridden** ("method hiding"). A subclass `static` method with the
+  same signature **hides** the parent's; which one runs is decided at **compile time by the reference
+  type**, not the object. `@Override` on a static method is a **compile error**.
+- Static methods **can't use `this`** or instance members, and **can't be abstract**.
+- **Static fields** are one shared slot → beware **mutable static state** (thread-safety hazards, and a
+  common **memory-leak** source since it lives as long as the class).
+- **Static initializer blocks** (`static { ... }`) run **once**, when the class is **loaded**, in textual
+  order with static field initializers. Parent statics initialize before child statics.
+- **Static nested class vs inner class:** a **`static` nested** class holds **no** reference to an outer
+  instance; a **(non-static) inner** class holds an **implicit reference to the outer object** — a classic
+  **memory leak** (e.g. a non-static `Handler`/`Runnable` pinning an Activity/outer). **Prefer `static`
+  nested** unless you truly need the outer instance.
+- **`static final` constants** of primitives/`String` are **inlined at compile time** into callers — so a
+  changed constant value won't take effect in another module until it's **recompiled**.
+
+**Kotlin has no `static`** — the equivalents:
+- **`companion object`** — one per class, for factory methods/constants; add **`@JvmStatic`** to expose
+  members as real Java statics.
+- **Top-level functions/properties** — the idiomatic replacement for utility statics (compiled to static
+  members of a file class).
+- **`object`** — a singleton (one instance).
+- **`const val`** — a compile-time constant (the Kotlin `static final` for primitives/strings).
+
+> **Senior answer:** "`static` is class-level, so it isn't polymorphic — static methods are **hidden, not
+> overridden**, and resolve by reference type. Watch mutable static state for leaks and concurrency, and
+> prefer **static nested** over inner classes to avoid pinning the outer object. Kotlin drops `static`
+> for **companion objects**, **top-level declarations**, and **`object`** singletons."
+
+---
+
+## 5. equals() — Reference vs Value Equality
 
 The default `Object.equals` is **reference equality** (`==`, same object in memory). You override it for
 **logical/value equality** ("same content").
@@ -66,7 +173,7 @@ The **`equals` contract** (must all hold, or collections misbehave):
 
 ---
 
-## 3. hashCode() — and Why It's Tied to equals
+## 6. hashCode() — and Why It's Tied to equals
 
 `hashCode()` returns an `int` used to pick a hash bucket. The **non-negotiable contract**:
 
@@ -89,7 +196,7 @@ The **default `hashCode`** is an *identity* hash (historically derived from the 
 
 ---
 
-## 4. == vs equals (Java) and == vs === (Kotlin)
+## 7. == vs equals (Java) and == vs === (Kotlin)
 
 This is a top gotcha in both languages:
 
@@ -114,7 +221,7 @@ a === b     // false — different instances
 
 ---
 
-## 5. toString()
+## 8. toString()
 
 Default `Object.toString` returns `ClassName@hexHashCode` — useless in logs. Override it for readable
 output (and **never** put secrets in it).
@@ -125,7 +232,7 @@ output (and **never** put secrets in it).
 
 ---
 
-## 6. Strings: Immutability, the Pool & Interning
+## 9. Strings: Immutability, the Pool & Interning
 
 Strings are **immutable** in both languages — every "modification" creates a **new** `String`. This
 enables safe sharing, caching, hashcode caching, and thread-safety.
@@ -154,7 +261,7 @@ a == c.intern();             // true  — intern() returns the pooled instance
 
 ---
 
-## 7. The Integer Cache & Autoboxing Traps
+## 10. The Integer Cache & Autoboxing Traps
 
 **Autoboxing** auto-converts between primitives (`int`) and wrappers (`Integer`). It hides two famous
 traps:
@@ -184,7 +291,7 @@ int y = x;         // NPE — silent autounboxing
 
 ---
 
-## 8. clone() vs Copy — Shallow vs Deep
+## 11. clone() vs Copy — Shallow vs Deep
 
 Copying objects is trickier than it looks.
 
@@ -214,7 +321,7 @@ b.items.add(other)         // also mutates a.items
 
 ---
 
-## 9. Pass-by-Value (Java is *always* pass-by-value)
+## 12. Pass-by-Value (Java is *always* pass-by-value)
 
 A persistent interview myth. **Java is always pass-by-value** — including for objects. What's passed is a
 **copy of the reference**, not the object and not the variable.
@@ -233,7 +340,7 @@ void f(StringBuilder sb) {
 
 ---
 
-## 10. Serialization
+## 13. Serialization
 
 **Serialization** = converting an object to bytes (to store/transmit) and back (deserialization).
 
@@ -263,7 +370,7 @@ val back = Json.decodeFromString<User>(json)
 
 ---
 
-## 11. finalize, Cleaner & getClass
+## 14. finalize, Cleaner & getClass
 
 - **`finalize()`** is **deprecated** (since Java 9) — unpredictable, may never run, hurts GC. **Never use
   it.** For cleanup, use **`try-with-resources`** + **`AutoCloseable`**, or `java.lang.ref.Cleaner` for
@@ -274,7 +381,7 @@ val back = Json.decodeFromString<User>(json)
 
 ---
 
-## 12. Kotlin-Specific Tricky Points
+## 15. Kotlin-Specific Tricky Points
 
 - **`Any` / `Any?`** — `Any` is the non-null root (≈ `Object`); `Any?` is the **nullable** root, the true
   top type. Null safety is enforced at **compile time**.
@@ -292,7 +399,29 @@ val back = Json.decodeFromString<User>(json)
 
 ---
 
-## 13. Interview Q&A Bank
+## 16. Interview Q&A Bank
+
+**Q: Java vs Kotlin access modifiers — and the default?**
+> Java: private, package-private (default), protected (package + subclasses), public. Kotlin: public
+> (default), internal (module), protected (subclasses only, no package), private (class/file). Java
+> defaults to package-private, Kotlin to public; Kotlin replaces package-private with internal.
+
+**Q: Override vs overload vs hide?**
+> Override = same signature in a subclass, runtime dispatch on object type (use @Override). Overload =
+> same name, different params, compile-time by declared type. Fields and static methods are hidden (by
+> reference type), not overridden — only instance methods are polymorphic.
+
+**Q: Can you override a static method?**
+> No — static methods are hidden, not overridden. The call resolves at compile time by the reference type;
+> @Override on a static is an error. Static members belong to the class, so they aren't polymorphic.
+
+**Q: Why not call an overridable method from a constructor?**
+> The super constructor runs before the subclass's fields are initialized, so the overridden method runs
+> against null/default fields — a subtle bug. Keep constructors free of overridable calls.
+
+**Q: Static nested class vs inner class?**
+> A static nested class holds no reference to an outer instance; a non-static inner class holds an
+> implicit outer reference (a common memory leak). Prefer static nested unless you need the outer object.
 
 **Q: Which Object methods can you override, and which can't?**
 > Override: equals, hashCode, toString, clone, finalize (deprecated). Cannot (final): getClass, wait,
@@ -343,10 +472,20 @@ val back = Json.decodeFromString<User>(json)
 
 ---
 
-## 14. Cheat Sheet
+## 17. Cheat Sheet
 
 - **Object methods:** override **equals/hashCode/toString** (and rarely clone/finalize); **getClass,
   wait/notify/notifyAll are `final`**. Kotlin root is **`Any`** (equals/hashCode/toString only).
+- **Access (Java):** `private` < package-private (**default**) < `protected` (package+subclasses) <
+  `public`. **Access (Kotlin):** `public` (**default**), `internal` (module), `protected` (subclasses
+  only), `private` (class/file). No package-private in Kotlin → use **`internal`**.
+- **Inheritance:** override (runtime, @Override) vs overload (compile-time); **fields & static methods are
+  hidden, not overridden** (resolved by reference type); covariant returns OK; **don't call overridable
+  methods in constructors**; Kotlin is **`final` by default** (`open`/`override` required).
+- **static:** class-level/shared; **static methods are hidden, not overridden**; mutable static = leak/
+  concurrency risk; **prefer static nested over inner** (inner pins the outer); `static final` constants
+  inline at compile time. Kotlin: **companion object / top-level / `object` / `const val`** instead of
+  `static`.
 - **Equality:** Java `==` = identity (objects) / value (primitives); `.equals` = logical. Kotlin `==` =
   **structural null-safe equals**, `===` = identity.
 - **Contracts:** equals = reflexive/symmetric/transitive/consistent/non-null; hashCode = equal⟹equal-hash,
