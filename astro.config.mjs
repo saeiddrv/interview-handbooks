@@ -4,8 +4,7 @@ import starlight from '@astrojs/starlight';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://saeiddrv.github.io',
-  base: '/interview-handbooks',
+  site: 'https://interview.saeiddrv.com',
   integrations: [
     starlight({
       title: 'Interview Handbooks',

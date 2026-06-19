@@ -1,6 +1,5 @@
 # Interview Handbooks
 
-[![Deploy site](https://github.com/saeiddrv/interview-handbooks/actions/workflows/deploy.yml/badge.svg)](https://github.com/saeiddrv/interview-handbooks/actions/workflows/deploy.yml)
 [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](LICENSE)
 [![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
 
@@ -8,9 +7,9 @@ A free, open-source library of **senior, staff, and principal level** engineerin
 handbooks — clear explanations, real examples, the tricky points called out, and a curated
 **interview Q&A bank** with strong, ready-to-say answers.
 
-**Live site:** https://saeiddrv.github.io/interview-handbooks/
+**Live site:** https://interview.saeiddrv.com
 
-Maintained by **[Saeid Darvish](https://saeiddrv.com)** for the community.
+Maintained by **[Saeid Darvishghazvini](https://saeiddrv.com)** for the community.
 
 ## Topics
 
@@ -45,8 +44,16 @@ src/content/docs/       # the handbooks (Markdown, grouped by category)
 src/components/         # Footer override (copyright)
 src/styles/            # brand colours
 astro.config.mjs       # site config, theme, sidebar nav
-.github/workflows/     # auto-deploy to GitHub Pages on push to main
 ```
+
+## Deployment (Cloudflare Pages)
+
+Deployed via **Cloudflare Pages** — no CI pipeline needed; Cloudflare builds on every push.
+
+- **Framework preset:** Astro
+- **Build command:** `npm run build`
+- **Build output directory:** `dist`
+- **Custom domain:** `interview.saeiddrv.com` (added in the Pages project → Custom domains)
 
 ## Contributing
 
@@ -57,5 +64,5 @@ page of the live site to open a pull request.
 ## License
 
 Content is licensed under
-[Creative Commons Attribution-NonCommercial 4.0](LICENSE) &copy; Saeid Darvish.
+[Creative Commons Attribution-NonCommercial 4.0](LICENSE) &copy; Saeid Darvishghazvini.
 You may share and adapt it with attribution for non-commercial use.

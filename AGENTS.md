@@ -7,9 +7,9 @@ Read this fully before adding or editing any content.
 
 A free, open-source library of **engineering interview handbooks** aimed at
 **senior, staff, and principal** level candidates. It is a static docs site built with
-**Astro + Starlight** and deployed to GitHub Pages.
+**Astro + Starlight** and deployed to **Cloudflare Pages**.
 
-Maintained by **Saeid Darvish** (https://saeiddrv.com) for the community.
+Maintained by **Saeid Darvishghazvini** (https://saeiddrv.com) for the community.
 Content license: **CC BY-NC 4.0**.
 
 ## Core values (the bar every page must meet)
@@ -127,16 +127,17 @@ for f in $(find src/content/docs -name '*.md'); do n=$(grep -c '^```' "$f"); [ $
 ```
 src/content/docs/        the handbooks (Markdown), grouped by category
   index.mdx              splash landing page (card grid) — MDX, not a handbook
-src/components/Footer.astro   copyright override (Saeid Darvish / saeiddrv.com)
+src/components/Footer.astro   copyright override (Saeid Darvishghazvini / saeiddrv.com)
 src/styles/custom.css    brand colours
-astro.config.mjs         title, sidebar nav, social links, editLink, site/base
-.github/workflows/deploy.yml   builds & deploys to GitHub Pages on push to main
+astro.config.mjs         title, sidebar nav, social links, editLink, site
 CONTRIBUTING.md          human-facing contribution guide (keep in sync with this file)
 ```
 
 ## Deployment notes
 
-- `site` + `base` in `astro.config.mjs` target a GitHub Pages **project** site
-  (`https://<user>.github.io/interview-handbooks/`). Update both, plus `repo_url`/`editLink`,
-  if the GitHub owner or repo name changes.
-- Deploy is automatic via GitHub Actions on push to `main`. Do not commit `dist/` or `.astro/`.
+- Hosted on **Cloudflare Pages** at **https://interview.saeiddrv.com**. No CI pipeline — Cloudflare
+  builds on every push (Framework preset: Astro · Build command: `npm run build` · Output: `dist`).
+- `site` in `astro.config.mjs` is the custom domain root, so there is **no `base` subpath**. Keep it
+  that way unless the hosting changes.
+- `repo_url` / `editLink` / `social` still point to the GitHub repo (source of truth for PRs).
+- Do not commit `dist/` or `.astro/`.
