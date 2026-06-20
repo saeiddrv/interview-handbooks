@@ -11,6 +11,30 @@ sidebar:
 
 ---
 
+## What is PostgreSQL?
+
+**PostgreSQL** (often called **Postgres**) is a free, open-source **Object-Relational Database
+Management System (ORDBMS)**. It was born in 1986 as a research project at UC Berkeley, became
+open-source in 1996, and has been actively developed by a global community ever since — making it
+one of the most battle-tested databases in existence.
+
+At its core, PostgreSQL stores data in **tables with rows and columns** (just like any relational
+database), but it goes further: it lets you define custom data types, write functions in multiple
+languages (SQL, PL/pgSQL, Python, etc.), and work natively with complex data like JSON, arrays,
+geometric shapes, and full-text documents — all with full ACID guarantees.
+
+Today it powers everything from small side projects to hyper-scale systems at companies like
+Apple, Instagram, Spotify, and Shopify. It is consistently ranked among the top three most
+popular databases in the world (DB-Engines ranking).
+
+**What makes it stand out at a senior level:**
+- Full SQL compliance plus powerful extensions (e.g. PostGIS for geospatial queries)
+- Rock-solid concurrency via MVCC — readers never block writers
+- Extensible by design: define custom data types and functions inside the database
+- Native table partitioning for managing large datasets efficiently
+
+---
+
 ## 1. What is an Object-Relational Database?
 
 In simple words, an **Object-Relational Database Management System (ORDBMS)** like PostgreSQL is a
@@ -61,14 +85,18 @@ out mid-click.
 - **Atomicity (All or Nothing):** A customer buys a book. The database must do two things: subtract
   \$20 from their bank account **AND** subtract 1 book from inventory. If the power cuts out exactly
   halfway through, PostgreSQL cancels the whole thing. You never get money taken but no book ordered.
+  (guaranteed by the **Write-Ahead Log — WAL**)
 - **Consistency (No Rule-Breaking):** You have a rule that says "inventory cannot be less than 0". If
   two people try to buy the very last copy at the exact same time, the database blocks the second
   sale because it would break the rule.
+  (enforced by **constraints** — e.g. `CHECK`, `NOT NULL`, `UNIQUE`)
 - **Isolation (No Peeking):** If 10,000 people are buying books at the exact same moment, the database
   processes them so they don't trip over each other. Each purchase feels like it's the only one
   happening.
+  (achieved via **MVCC** — Multi-Version Concurrency Control)
 - **Durability (Saved Forever):** Once the database says "Order Confirmed," that data is written to
   the hard drive. Even if the server gets unplugged a millisecond later, your order is safe.
+  (guaranteed by the **Write-Ahead Log — WAL**)
 
 > **Accuracy note (good to know for interviews):** Durability and crash recovery come from the
 > **Write-Ahead Log (WAL)** — before changing the data files, Postgres writes the change to the log
@@ -261,9 +289,31 @@ version** (\$20). No one has to wait in line just to look at the screen.
   for ID #543,211, a normal database scans all 10 million rows top to bottom. An **index** is like
   the index at the back of a textbook — it tells PostgreSQL exactly what page and row that ID lives
   on, speeding searches from seconds to milliseconds.
+
+```sql
+-- Without an index: Postgres reads all 10 million rows (slow)
+SELECT * FROM books WHERE id = 543211;
+
+-- Create an index on the id column
+CREATE INDEX idx_books_id ON books (id);
+
+-- Now Postgres jumps directly to the row (fast)
+SELECT * FROM books WHERE id = 543211;
+```
+
 - **Full-Text Search (Google-like search):** Standard databases can only look for exact matches.
   Full-text search lets a customer type "wizard boy magic" and PostgreSQL is smart enough to handle
   typos, ignore words like "and" or "the", and surface Harry Potter.
+
+```sql
+-- Create a GIN index for fast full-text search on the title column
+CREATE INDEX idx_books_fts ON books USING GIN (to_tsvector('english', title));
+
+-- Customer types "wizard boy magic" — PostgreSQL finds Harry Potter
+SELECT title
+FROM books
+WHERE to_tsvector('english', title) @@ to_tsquery('english', 'wizard & boy & magic');
+```
 
 ### 2.5 Extensibility (custom functions & data types)
 You can teach PostgreSQL new tricks it didn't know out of the box.
@@ -271,9 +321,54 @@ You can teach PostgreSQL new tricks it didn't know out of the box.
 - **Custom Data Type:** You want to store book dimensions. Instead of saving Width, Height, and Depth
   in three columns, you can invent a brand-new data type called `box_size` that holds all three
   together.
+
+```sql
+-- Define a composite type that groups all three dimensions together
+CREATE TYPE box_size AS (
+    width_cm  numeric,
+    height_cm numeric,
+    depth_cm  numeric
+);
+
+-- Use it as a column type — one column, three values
+CREATE TABLE books (
+    id      serial PRIMARY KEY,
+    title   text,
+    dimensions box_size          -- instead of three separate columns
+);
+
+-- Insert a book with its dimensions
+INSERT INTO books (title, dimensions)
+VALUES ('Harry Potter', ROW(13.2, 19.7, 3.5));
+```
+
 - **Custom Function:** You can write a mini-program directly inside the database. For instance, a
   function `calculate_shipping_cost()` that automatically calculates tax and shipping at checkout —
   without your main website software doing the math.
+
+```sql
+-- A function that lives inside the database and does the math for you
+CREATE OR REPLACE FUNCTION calculate_shipping_cost(
+    order_total  numeric,
+    destination  text
+) RETURNS numeric AS $$
+BEGIN
+    -- Free shipping on orders over $50
+    IF order_total >= 50 THEN
+        RETURN 0.00;
+    END IF;
+    -- International orders cost more
+    IF destination = 'international' THEN
+        RETURN 19.99;
+    END IF;
+    RETURN 4.99;  -- standard domestic
+END;
+$$ LANGUAGE plpgsql;
+
+-- Your app just calls this — no math needed in application code
+SELECT calculate_shipping_cost(34.00, 'domestic');   -- returns 4.99
+SELECT calculate_shipping_cost(60.00, 'domestic');   -- returns 0.00
+```
 
 ### Summary Checklist
 
@@ -289,102 +384,104 @@ You can teach PostgreSQL new tricks it didn't know out of the box.
 
 ## 3. Is an `UPDATE` really a `DELETE` + `INSERT`?
 
-Yes, it is a fundamental architectural fact of how PostgreSQL handles data — **but with one massive
-asterisk called HOT (Heap-Only Tuples).** So: it is **not always** a pure delete-and-insert on disk,
-and it **can be highly inefficient** if not managed correctly.
+Yes — **always**, at the conceptual level. Postgres never overwrites a row in place.
+But a smart optimization called **HOT (Heap-Only Tuples)** makes most updates cheap on disk.
+Understanding both the base mechanic and HOT is a reliable senior interview signal.
 
-### The base fact: why Postgres does this
-Postgres uses **MVCC**. To allow one user to read a row while another modifies it, Postgres cannot
-just overwrite the data in place. If you change a user's status from "active" to "banned", Postgres
-writes a brand-new row with "banned" (the INSERT step) and flags the old row containing "active" as
-"dead" so future queries ignore it (the DELETE step).
+### Why Postgres never overwrites in place
 
-### Is it always like this? Enter "HOT Updates"
-If Postgres literally performed a full separate delete and insert for every update — writing the new
-row to a far-away page and updating every index — it would be incredibly slow. To fix this, Postgres
-uses a brilliant optimization called **HOT (Heap-Only Tuples).**
+Postgres uses **MVCC** (Multi-Version Concurrency Control). To let one transaction read a row
+while another is modifying it, Postgres must keep **both versions alive at the same time** —
+it cannot just overwrite the old one.
 
-> **First, kill the #1 misconception: HOT is NOT "in-place changing."** An `UPDATE` in Postgres
-> **always** writes a brand-new row version — it **never** overwrites the old row in place, not even
-> with HOT (that would break MVCC, since other transactions still need the old version). The old row
-> always stays as a dead tuple until VACUUM. **HOT does not change that.**
+When you run:
+```sql
+UPDATE users SET status = 'banned' WHERE id = 99;
+```
+Postgres does two things:
+1. **Writes a brand-new row** with `status = 'banned'` (the INSERT step)
+2. **Flags the old row** (`status = 'active'`) as a **dead tuple** — invisible to future queries
+   but left on disk until `VACUUM` cleans it up (the DELETE step)
 
-**So what does HOT actually change? Just two things:** (1) **where** the new row version is written,
-and (2) **whether the indexes get touched.** That's it.
+The old row is never touched or overwritten. Other transactions that started before your update
+still see the original version — that is the MVCC guarantee.
 
-**Without HOT (the expensive case):** the new version lands on a **different page**, and **every
-index** must be updated to point to its new location.
+### The cost: what happens without any optimization
+
+If Postgres had no further tricks, every single `UPDATE` would:
+- Write the new row version to a **different page** on disk
+- Walk to **every index** on the table and insert a new pointer to the new row location
+- Leave the old row behind as a dead tuple until `VACUUM`
+
+On a table with 10 indexes, one `UPDATE` would produce 10 index writes. At thousands of updates
+per second that becomes serious **write amplification** and **index bloat**.
+
+### HOT (Heap-Only Tuples): the optimization
+
+HOT eliminates index writes for updates that qualify. Before going further:
+
+> **Kill the #1 misconception: HOT is NOT in-place editing.** Postgres **always** writes a
+> brand-new row version — it never overwrites the old one, not even with HOT. The old dead
+> tuple still stays until `VACUUM`. What HOT changes is only (1) **where** the new version is
+> written and (2) **whether the indexes are touched**.
+
+**Without HOT** the new version lands on a different page and every index must be updated:
 ```
 PAGE 5                          PAGE 9
 +------------------+            +------------------+
-| old row (dead) X |            | NEW row (live) V |  <- new version goes here
+| old row (dead) X |            | NEW row (live) V |  <- written to a different page
 +------------------+            +------------------+
         ^                                ^
         |                                |
-   index used to                  index now must
-   point here ...   --updated-->   point here
-   (EVERY index on the table gets a new entry = write amplification + bloat)
+   index pointed here  --updated-->  index must now point here
+   (every index on the table gets a new entry = write amplification)
 ```
 
-**With HOT (the cheap case):** the new version is written on the **same page** (because there was free
-space), and the old tuple keeps a tiny **pointer** to the new one (a "HOT chain"). **The indexes are
-never touched** — they still point at the old slot, and Postgres just *follows the pointer* on that
-same page to find the live version.
+**With HOT** the new version is written on the **same page**, and the old tuple holds a tiny
+pointer to it. The indexes never change — they still point at the old slot, and Postgres
+follows the in-page pointer to reach the live version:
 ```
-PAGE 5 (same page!)
+PAGE 5 (same page)
 +------------------------------------+
-| old row (dead) X --+               |
-|                    +--> NEW row V  |   <- new version, same page
+| old row (dead) X --+--> NEW row V  |  <- new version, same page
 +------------------------------------+
         ^
         |
-   index STILL points here -- never updated!
-   Postgres follows the in-page pointer to reach the live row.
+   index STILL points here — never updated
+   Postgres follows the in-page pointer to the live row
 ```
 
-**Now the two conditions make sense. HOT happens ONLY IF:**
+### The two conditions for HOT
 
-1. **No indexed column changed.** The indexes are still "correct" pointing at the old slot, so Postgres
-   is *allowed* to skip updating them. (If you change an indexed column, the index value itself is now
-   wrong and **must** be updated → no HOT possible.)
-2. **There is room on the same page.** The new version must physically fit next to the old one. (If the
-   page is full, the new version goes to another page → indexes must point there → no HOT possible.)
-   You reserve this free space with the table's **`fillfactor`** setting (e.g., 85–90%).
+HOT happens **only when both conditions are met**:
+
+| Condition | Why it matters |
+|---|---|
+| **No indexed column changed** | If an indexed value changes, the index entry is now wrong and must be updated — HOT is impossible |
+| **Free space on the same page** | The new version must physically fit next to the old one — reserve this with `fillfactor` (e.g. 85–90%) |
+
+If either condition fails, Postgres falls back to the full non-HOT path: new page + every index updated.
+
+### HOT vs. non-HOT at a glance
 
 | | Non-HOT update | HOT update |
 |---|---|---|
-| New row version created? | Yes | Yes (still!) |
-| Old row overwritten in place? | No | No |
-| New version location | possibly another page | **same page** |
-| Indexes updated? | every index (slow, bloat) | **none** (fast) |
-| Old version cleaned by | VACUUM | VACUUM |
-
-> **One-line interview answer:** "HOT doesn't update in place — Postgres still writes a new row
-> version. The win is that the new version goes on the **same page** and the old tuple **points** to
-> it, so **none of the indexes need updating**. It's possible only when no indexed column changes and
-> the page has free room (which you reserve via `fillfactor`)." In short: **HOT = "new version, same
-> page, skip the index updates"** — not in-place editing.
-
-### Is it efficient?
-It depends entirely on your database design.
-
-- **Highly INEFFICIENT (the trap):** If you frequently update columns that have indexes on them,
-  Postgres cannot use HOT.
-  - **Index Bloat:** Postgres must go to **every single index** on that table and insert a new
-    pointer to the new row location.
-  - **Table Bloat:** The old rows ("dead tuples") stay on disk taking up space until **VACUUM** cleans
-    them up. If you update thousands of rows a second, your database size skyrockets rapidly.
-- **EFFICIENT:** If you keep indexes lean and configure your table's **`fillfactor`** correctly
-  (telling Postgres to leave, say, 10% of every page empty specifically to give HOT updates room to
-  breathe), Postgres handles updates beautifully with minimal overhead.
+| New row version written? | Yes | Yes (always) |
+| Old row overwritten? | No | No |
+| New version location | possibly a different page | **same page** |
+| Indexes updated? | every index | **none** |
+| Old version cleaned by | `VACUUM` | `VACUUM` |
 
 ### Summary
-- **Is it a fact?** Yes. Conceptually and architecturally, an `UPDATE` is always a `DELETE` + `INSERT`
-  to maintain MVCC.
-- **Is it always true on disk?** No. If a HOT update triggers, Postgres optimizes it heavily on the
-  physical layer so it doesn't touch the indexes.
-- **Is it efficient?** Highly efficient for read-heavy workloads (readers never block writers), but it
-  requires careful indexing strategies to stay efficient for write-heavy workloads.
+
+- **Conceptually:** an `UPDATE` is always a `DELETE` + `INSERT` — Postgres never edits rows in place.
+- **On disk:** HOT skips all index writes when no indexed column changes and the page has free room.
+- **Keep it efficient:** avoid indexing high-churn columns; set `fillfactor` to 85–90% on tables
+  with frequent updates so pages always have room for HOT.
+- **Interview line:** “HOT doesn’t update in place — a new row version is always written. The win
+  is that the new version lands on the **same page** and the indexes are never touched. Two
+  conditions must hold: no indexed column changed, and the page has free space (reserved via
+  `fillfactor`).”
 
 ---
 
@@ -405,6 +502,17 @@ binary tree — see the box below).
   and March.
 
 ```sql
+CREATE TABLE users (
+    id         serial PRIMARY KEY,
+    email      text NOT NULL,
+    username   text
+);
+CREATE TABLE orders (
+    id         serial PRIMARY KEY,
+    user_id    int REFERENCES users(id),
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+
 -- Create a B-Tree index (the default — USING BTREE is optional)
 CREATE INDEX idx_users_email ON users (email);
 
@@ -450,6 +558,12 @@ max values for a "block"** (page range) of data.
 - **Example:** A `system_logs` table sorted by `created_at` where you query data by specific days.
 
 ```sql
+CREATE TABLE system_logs (
+    id         bigserial PRIMARY KEY,
+    message    text,
+    created_at timestamptz NOT NULL DEFAULT now()  -- rows inserted in time order
+);
+
 -- Create a BRIN index on the time-ordered column
 CREATE INDEX idx_logs_created_brin ON system_logs USING BRIN (created_at);
 
@@ -489,14 +603,25 @@ to pages 12, 45, 89. GIN splits composite data into individual components and in
 
 - **Best Used For:** Searching inside complex data such as arrays, JSONB documents, or full-text
   search tokens.
-- **Pros:** Instantly finds rows where a JSON document contains a specific key/value pair or an array
-  contains a specific item.
+- **Pros:** Instantly finds rows where a **JSONB** document contains a specific key/value pair or an
+  array contains a specific item.
 - **Cons:** Very slow and expensive to update during `INSERT`/`UPDATE` because it modifies multiple
   pointers.
 - **Example:** Searching inside a JSONB column to find all users with the preference
   `{"theme": "dark"}`.
 
 ```sql
+CREATE TABLE users (
+    id    serial PRIMARY KEY,
+    name  text,
+    prefs jsonb            -- binary JSON: supports GIN indexing
+);
+CREATE TABLE posts (
+    id   serial PRIMARY KEY,
+    body text,
+    tags text[]            -- array of text tags
+);
+
 -- JSONB: index the whole document, then search with the @> "contains" operator
 CREATE INDEX idx_users_prefs_gin ON users USING GIN (prefs);
 SELECT * FROM users WHERE prefs @> '{"theme": "dark"}';
@@ -518,7 +643,16 @@ of abstract, geometric, or hierarchical data shapes.
   the PostGIS extension.
 
 ```sql
--- Geospatial: index a geometry/geography column, then query "nearby"
+CREATE TABLE places (
+    name     text,
+    location geography(Point, 4326)  -- PostGIS longitude/latitude point, WGS84 coordinate system
+);
+CREATE TABLE reservations (
+    room_id  int,
+    during   tstzrange               -- timestamp-with-timezone range, e.g. '[2024-06-01, 2024-06-03)'
+);
+
+-- Geospatial: index the geography column, then query "nearby"
 CREATE INDEX idx_places_geom_gist ON places USING GIST (location);
 SELECT name FROM places
 WHERE ST_DWithin(location, ST_MakePoint(-122.4, 37.8)::geography, 8047);  -- ~5 miles
@@ -529,15 +663,44 @@ SELECT * FROM reservations WHERE during && tstzrange('2024-06-01','2024-06-03');
 ```
 
 ### 4.5 Hash Index
-Runs your column data through a hash function to generate a shorthand key.
 
-- **Best Used For:** Strictly exact matches (`=`).
-- **Pros:** Slightly faster than B-Trees for exact equality lookups.
-- **Cons:** Cannot handle range queries (`>`) or sorting. Historically lacked crash-safety (fixed in
-  Postgres 10). Still, B-Trees are generally preferred.
-- **Example:** Checking if an MD5 string token exactly matches a token in your database.
+A Hash index works by running each column value through a **hash function** — an internal algorithm
+that converts any value (text, number, UUID, etc.) into a fixed-size number. That number is stored
+in the index alongside a pointer to the row.
+
+At query time, Postgres hashes your search value the same way and looks up the result instantly.
+You always write and compare **plain values** — the hashing is entirely internal and invisible to you.
+
+```
+  INSERT 'a1b2c3d4e5f6'  →  hash function  →  84729  →  stored in index → points to row
+  WHERE token = 'a1b2c3d4e5f6'  →  hash function  →  84729  →  jump straight to row
+```
+
+Because only the **hash of the value** is stored — not the value itself — Postgres can only ask
+"does this hash match exactly?". It has no way to compare magnitudes or prefixes:
+
+| Query | Uses Hash index? |
+|---|---|
+| `WHERE token = 'abc'` | Yes |
+| `WHERE token > 'abc'` | No — hash numbers have no meaningful order |
+| `WHERE token LIKE 'abc%'` | No — prefix matching needs the actual value |
+| `ORDER BY token` | No — sorting requires order, hashes have none |
+
+Works on **any type that supports `=`**: `text`, `integer`, `uuid`, `boolean`, and more.
+
+- **Best Used For:** Strictly exact matches (`=`) on columns that are never sorted or range-queried.
+- **Pros:** Slightly faster than B-Trees for pure equality lookups — one hash lookup vs. 2–3 B-Tree level traversals.
+- **Cons:** Cannot handle `>`, `<`, `BETWEEN`, `LIKE`, or `ORDER BY`. B-Trees handle all of those, so in practice a B-Tree is almost always preferred unless you have measured a concrete gain.
+- **Example:** Looking up a session token — always an exact match, never sorted or range-queried.
 
 ```sql
+CREATE TABLE sessions (
+    id         bigserial PRIMARY KEY,
+    user_id    int,
+    token      text NOT NULL,    -- fixed-format hash string, equality-only lookups
+    created_at timestamptz DEFAULT now()
+);
+
 -- Hash: only equality (=), no ranges or sorting
 CREATE INDEX idx_sessions_token_hash ON sessions USING HASH (token);
 SELECT * FROM sessions WHERE token = 'a1b2c3d4e5f6';
@@ -546,26 +709,145 @@ SELECT * FROM sessions WHERE token = 'a1b2c3d4e5f6';
 ### 4.6 Advanced Indexing Strategies (best practices)
 To truly master indexing, rarely just use basic single-column indexes. Use these three strategies:
 
-**A. Partial Indexes (the space saver)** — If you frequently query only a subset of rows, only index
-rows that match a `WHERE` clause.
-```sql
-CREATE INDEX idx_unprocessed_orders ON orders (created_at) WHERE status = 'pending';
-```
-**Why:** The index stays tiny and fast because it ignores the millions of 'completed' orders.
+---
 
-**B. Covering Indexes (`INCLUDE` clause)** — Bake extra data directly into the index leaf nodes.
-```sql
-CREATE INDEX idx_user_email ON users (email) INCLUDE (username);
-```
-**Why:** `SELECT username FROM users WHERE email = 'x'` is answered entirely from the index — never
-touching the main table ("Index-Only Scan"). (Full deep dive in §5.)
+**A. Partial Indexes (the space saver)**
 
-**C. Multi-Column (Composite) Indexes** — If queries filter by multiple columns together (e.g.
-`WHERE last_name = 'Smith' AND first_name = 'John'`), a composite index on `(last_name, first_name)`
-is very efficient.
-> **Crucial Rule — Order matters!** Postgres can use this index if you search by `last_name` alone,
-> but **not** efficiently if you search by `first_name` alone. Put the most frequently filtered or
-> highest-cardinality column first.
+A partial index only indexes the rows that match a `WHERE` condition — it completely ignores
+every other row.
+
+**When to use it:** your queries almost always target a small, well-defined subset of a large table.
+Classic examples: unprocessed jobs, unpaid invoices, active users, flagged content.
+
+**What happens without it:** a normal index on `created_at` would include every order ever placed —
+pending, completed, and cancelled. You'd be maintaining and searching a huge index just to find
+the small slice of rows you actually care about. Wasted disk space, wasted RAM, slower writes.
+
+```sql
+CREATE TABLE orders (
+    id         serial PRIMARY KEY,
+    user_id    int,
+    status     text NOT NULL,    -- 'pending', 'completed', 'cancelled'
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- Without partial index: indexes ALL orders (millions of completed rows you never query)
+CREATE INDEX idx_all_orders ON orders (created_at);
+-- index size: ~500 MB (all rows)
+
+-- With partial index: indexes ONLY pending orders (a tiny fraction)
+CREATE INDEX idx_pending_orders ON orders (created_at) WHERE status = 'pending';
+-- index size: ~2 MB (only the rows that matter)
+```
+
+The query `SELECT * FROM orders WHERE status = 'pending' ORDER BY created_at` uses the partial
+index automatically — Postgres knows it only needs to look at pending rows.
+
+**What if you create one partial index per status value?**
+
+You can — but it only makes sense when the subset is **small relative to the total table**.
+In a typical orders table the row distribution looks like this:
+
+| Status | Typical % of rows | Partial index useful? | Why |
+|---|---|---|---|
+| `pending` | ~1% | Yes | Tiny index, queried constantly |
+| `cancelled` | ~5% | Maybe | Still small, worth it if queried often |
+| `completed` | ~94% | **No** | Index is nearly as large as a full index — zero benefit |
+
+If `completed` holds 94% of your rows, a partial index on it is essentially a full index.
+You pay all the write overhead and gain almost nothing on reads.
+
+**The hidden cost of multiple partial indexes:** every time an order moves from `pending` →
+`completed`, Postgres must update **both** indexes — remove the row from `idx_pending` and
+insert it into `idx_completed`. The more partial indexes you stack, the more write
+amplification on every status change.
+
+```sql
+-- Good: index only the small, frequently queried subsets
+CREATE INDEX idx_pending   ON orders (created_at) WHERE status = 'pending';
+CREATE INDEX idx_cancelled ON orders (created_at) WHERE status = 'cancelled';
+
+-- Bad: indexing 'completed' (94% of rows) gains nothing — avoid this
+-- CREATE INDEX idx_completed ON orders (created_at) WHERE status = 'completed';
+
+-- For 'completed' queries, either rely on a normal full index or accept
+-- that you rarely need to query the completed orders by date at high speed.
+```
+
+> **Rule of thumb:** reach for a partial index when the subset is small (ideally under 10–15%
+> of the table) and queried frequently. If the subset is large, a normal full index or a
+> different strategy (partitioning by status) will serve you better.
+
+---
+
+**B. Covering Indexes (`INCLUDE` clause)**
+
+A covering index bakes extra column values directly into the index leaf nodes, so Postgres can
+answer a query **entirely from the index** without ever visiting the main table.
+
+**When to use it:** a query always filters by one column but also selects one or two other columns.
+Classic example: a login check — always filter by `email`, always return `id` and `username`.
+
+**What happens without it:** Postgres uses the index to find the matching row, then makes a second
+trip to the main table (heap) to fetch the extra columns. With millions of logins per day,
+those extra heap trips add up — more disk reads, more latency.
+
+```sql
+-- Without covering index: 2 steps per login
+-- Step 1: index lookup finds the row location by email
+-- Step 2: heap fetch visits the main table to get id and username
+CREATE INDEX idx_users_email ON users (email);
+SELECT id, username FROM users WHERE email = 'alice@example.com';
+-- EXPLAIN shows: Index Scan + Heap Fetches
+
+-- With covering index: 1 step per login
+-- The index already holds id and username right next to email — no table visit needed
+CREATE INDEX idx_users_email_covering ON users (email) INCLUDE (id, username);
+SELECT id, username FROM users WHERE email = 'alice@example.com';
+-- EXPLAIN shows: Index Only Scan (no heap fetches)
+```
+
+> **Note:** only put columns in `INCLUDE` that you **select but never filter or sort by**.
+> Columns you filter or sort by belong in the main index key, not in `INCLUDE`.
+
+---
+
+**C. Multi-Column (Composite) Indexes**
+
+A composite index covers multiple columns in a single index structure, built for queries that
+filter by several columns together.
+
+**When to use it:** your queries regularly filter by two or more columns at the same time.
+Classic example: an employee directory — always search by `last_name` AND `first_name` together.
+
+**What happens without it:** with two separate single-column indexes, Postgres can only use one
+of them efficiently and then filter the rest in memory — or in the worst case, scan the whole
+table. One composite index serves the multi-column query directly.
+
+```sql
+CREATE TABLE employees (
+    id         serial PRIMARY KEY,
+    last_name  text NOT NULL,
+    first_name text NOT NULL,
+    department text
+);
+
+-- Without composite index: two separate indexes — Postgres picks one and filters in memory
+CREATE INDEX idx_last  ON employees (last_name);
+CREATE INDEX idx_first ON employees (first_name);
+SELECT * FROM employees WHERE last_name = 'Smith' AND first_name = 'John';
+-- Postgres uses idx_last, scans all Smiths, then filters for John in memory
+
+-- With composite index: one lookup finds exactly the right rows
+CREATE INDEX idx_name ON employees (last_name, first_name);
+SELECT * FROM employees WHERE last_name = 'Smith' AND first_name = 'John'; -- fast
+SELECT * FROM employees WHERE last_name = 'Smith';                          -- also fast (leftmost prefix)
+SELECT * FROM employees WHERE first_name = 'John';                          -- does NOT use the index
+```
+
+> **Crucial rule — column order matters.** Postgres can use a composite index if you filter by
+> the **leftmost column(s)** of the index. Put the column you filter by most often, or with the
+> highest cardinality (most unique values), first. `first_name` alone cannot use `(last_name, first_name)`.
 
 ### 4.7 The Golden Rules of Production Indexing
 1. **Never build indexes in production with a standard `CREATE INDEX`.** It locks the table,
@@ -575,6 +857,17 @@ is very efficient.
 3. **Watch out for functional indexes.** An index on `email` is ignored by
    `WHERE LOWER(email) = 'user@test.com'`. You must index the function itself:
    `CREATE INDEX ON users (LOWER(email));`.
+4. **Run `ANALYZE` after bulk changes.** Postgres's query planner decides whether to use an index
+   based on table statistics. After a large `INSERT`, `UPDATE`, `DELETE`, or a freshly created index,
+   those statistics can be stale — causing the planner to ignore your index and fall back to a slow
+   sequential scan. Fix it by updating the statistics manually:
+   ```sql
+   ANALYZE orders;          -- refresh statistics for one table
+   ANALYZE;                 -- refresh statistics for the entire database
+   VACUUM (ANALYZE) orders; -- reclaim dead tuples AND refresh statistics in one pass
+   ```
+   Autovacuum does this automatically over time, but after a large one-off bulk operation
+   you should run it manually rather than waiting.
 
 ### 4.8 Partitioning (splitting one big table into smaller sub-tables)
 
@@ -763,6 +1056,59 @@ heavy processes — instantly maxing out RAM and CPU and crashing the database.
   connections to the pooler, but the pooler routes them through just 20–30 "real", highly optimized
   connections to Postgres, sharing them dynamically — keeping the database fast and stable.
 
+**The difference between framework pooling and an external pooler**
+
+Many developers already use connection pooling inside their application framework (Hibernate,
+HikariCP, SQLAlchemy, etc.) and assume that's enough. It isn't — they solve different problems
+at different layers:
+
+| | Framework pooling (HikariCP, Hibernate) | External pooler (PgBouncer, Supavisor) |
+|---|---|---|
+| **Lives** | Inside your app process | Separate process between app and Postgres |
+| **Scope** | One app server only | All app servers combined |
+| **Solves** | Cost of opening/closing a connection on every request | Total connection count exploding as you scale horizontally |
+| **Postgres sees** | Every app server's connections individually | Only the pooler's fixed set of connections |
+
+The problem with framework pooling alone at scale:
+
+```
+WITHOUT external pooler:
+App Server 1 (20 conns) ──┬
+App Server 2 (20 conns) ──┤──→ Postgres (400 real OS processes → RAM exhausted, crashes)
+App Server 3 (20 conns) ──┘  ... 20 servers × 20 conns = 400 connections
+
+WITH external pooler:
+App Server 1 (20 conns) ──┬
+App Server 2 (20 conns) ──┤──→ PgBouncer ──→ Postgres (20 real OS processes → stable)
+App Server 3 (20 conns) ──┘
+```
+
+In production you typically use **both**: framework pooling inside each app server to avoid
+per-request connection overhead, and PgBouncer in front of Postgres to keep the total real
+connection count fixed regardless of how many app servers you run.
+
+**PgBouncer vs Supavisor — which one to pick**
+
+Neither is universally better — they target different environments:
+
+| | PgBouncer | Supavisor |
+|---|---|---|
+| **Written in** | C | Elixir |
+| **Maturity** | Since 2007, extremely battle-tested | Released 2023 by Supabase |
+| **Architecture** | Single-threaded, single process | Multi-node, clustered by design |
+| **Multi-tenancy** | Not built for it | Built specifically for it |
+| **Pooling modes** | Session, Transaction, Statement | Session, Transaction |
+| **Observability** | Minimal built-in | Better built-in metrics |
+| **Best for** | Self-hosted Postgres, traditional setups | Multi-tenant SaaS, cloud-native, Supabase |
+
+- **Use PgBouncer** if you run your own Postgres — it is the industry default, proven at massive
+  scale, and has almost zero operational surprises.
+- **Use Supavisor** if you are on Supabase or building a multi-tenant SaaS where each customer
+  has their own database — it handles that model natively where PgBouncer becomes painful to manage.
+
+> **Senior answer:** “PgBouncer is the safe default for self-hosted setups. Supavisor solves the
+> multi-tenant clustering problem PgBouncer was never designed for.”
+
 ### Summary Checklist for a Production-Ready Postgres Application
 - Always use **JSONB** instead of plain JSON for rapid read performance and indexing.
 - Always use **`CREATE INDEX CONCURRENTLY`** so you don't lock tables and freeze your app.
@@ -863,6 +1209,30 @@ When rows are modified, Postgres locks individual tuples (rows) to prevent concu
   they don't change the key columns (like the ID).
 - **Pros:** Minimizes blocking. Validates foreign keys without preventing unrelated data updates.
 - **Cons:** Requires precise architectural understanding; rarely called manually by developers.
+
+### Row-Level Lock Compatibility Matrix
+
+Shows whether two transactions can hold their locks on the **same row** simultaneously.
+`OK` = both can proceed · `Blocks` = second transaction must wait.
+
+| Lock requested \ Lock held | `FOR KEY SHARE` | `FOR SHARE` | `FOR NO KEY UPDATE` | `FOR UPDATE` |
+|---|---|---|---|---|
+| `FOR KEY SHARE` | OK | OK | OK | Blocks |
+| `FOR SHARE` | OK | OK | Blocks | Blocks |
+| `FOR NO KEY UPDATE` | OK | Blocks | Blocks | Blocks |
+| `FOR UPDATE` | Blocks | Blocks | Blocks | Blocks |
+
+**When to use which — at a glance:**
+
+| Lock mode | Typical use case | Blocks readers? |
+|---|---|---|
+| `FOR KEY SHARE` | Validate a foreign key without blocking unrelated updates | No |
+| `FOR SHARE` | Prevent a parent row from being deleted while inserting a child | No |
+| `FOR NO KEY UPDATE` | Standard `UPDATE` (used automatically by Postgres) | No |
+| `FOR UPDATE` | Financial transactions — reserve the row exclusively | No |
+
+> **Note:** None of the row-level locks block plain `SELECT` statements — that is MVCC at work.
+> Readers always see a consistent snapshot and never wait for row locks.
 
 ### Part 3: Advisory Locks (application-level control)
 What if you want to lock something that **isn't** a table or row? For example, you want your
