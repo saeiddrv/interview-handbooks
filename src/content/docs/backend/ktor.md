@@ -1,6 +1,6 @@
 ---
-title: "Ktor Framework (vs Spring Boot) — Interview Handbook"
-description: "A clear, deep guide to Ktor: the coroutine-native Kotlin web framework — engines (Netty/CIO), the application/module DSL, routing, the plugin pipeline, content negotiation, authentication, the Ktor client, configuration, testing, and async-by-default design — ending with a thorough Ktor vs Spring Boot comparison and a Q&A bank."
+title: "Ktor (vs Spring Boot) — Interview Handbook"
+description: "Ktor deep dive: routing, the plugin pipeline, authentication, the Ktor client, testing, and a Ktor vs Spring Boot comparison — with a Q&A bank."
 sidebar:
   label: "Ktor (vs Spring Boot)"
 ---

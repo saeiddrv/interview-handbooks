@@ -1,5 +1,5 @@
 ---
-title: "Elasticsearch — Advanced Interview Handbook"
+title: "Elasticsearch — Interview Handbook"
 description: "A deep, easy-to-understand guide to Elasticsearch for senior interviews: the inverted index, how search & relevance really work, shards & replicas, the…"
 sidebar:
   label: "Elasticsearch"

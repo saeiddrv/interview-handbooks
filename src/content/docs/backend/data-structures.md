@@ -1,6 +1,6 @@
 ---
-title: "Java & Kotlin Data Structures — Advanced Interview Handbook"
-description: "A deep guide to Java collections and Kotlin data structures: every implementation, its internals, time/space complexity, when (and when not) to use it, the version that introduced it, and the why behind the choices — HashMap vs TreeMap, ArrayList vs LinkedList, ConcurrentHashMap internals, Kotlin read-only vs mutable, sequences — with a Q&A bank."
+title: "Java & Kotlin Data Structures — Interview Handbook"
+description: "Java and Kotlin collections: internals, time/space complexity, when to use each — HashMap, ArrayList, ConcurrentHashMap, sequences — with a Q&A bank."
 sidebar:
   label: "Java & Kotlin Data Structures"
 ---

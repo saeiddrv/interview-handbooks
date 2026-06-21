@@ -1,6 +1,6 @@
 ---
-title: "OOP & Design Patterns — Advanced Interview Handbook"
-description: "OOP design and the Gang of Four patterns explained simply but deeply: the four OOP pillars, composition over inheritance, SOLID and DRY/KISS/YAGNI, all 23 GoF patterns (creational, structural, behavioral) with when to use each, real Java/Kotlin examples, how Spring and the JDK use them, Kotlin idioms (object, sealed, data class, delegation), anti-patterns and overengineering — with a high-level Q&A bank."
+title: "OOP & Design Patterns — Interview Handbook"
+description: "OOP and all 23 GoF patterns: SOLID, composition over inheritance, Java/Kotlin examples, Kotlin idioms, Spring usage, and anti-patterns — with a Q&A bank."
 sidebar:
   label: "OOP & Design Patterns"
 ---

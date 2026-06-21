@@ -1,6 +1,6 @@
 ---
-title: "API Design & GraphQL — Advanced Interview Handbook"
-description: "Designing APIs that scale: REST principles and maturity, resource modeling, versioning, pagination, idempotency, errors, rate limiting, HATEOAS, plus GraphQL (schema, resolvers, N+1/DataLoader, vs REST) and gRPC — with tradeoffs and a Q&A bank."
+title: "API Design & GraphQL — Interview Handbook"
+description: "API design: REST maturity, versioning, pagination, idempotency, rate limiting, HATEOAS, GraphQL N+1/DataLoader, and gRPC — with a Q&A bank."
 sidebar:
   label: "API Design & GraphQL"
 ---

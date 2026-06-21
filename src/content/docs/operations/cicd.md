@@ -1,6 +1,6 @@
 ---
-title: "CI/CD & Deployment Strategies — Advanced Interview Handbook"
-description: "Shipping software safely and fast: CI vs CD vs continuous deployment, the pipeline stages, trunk-based development, deployment strategies (blue-green, canary, rolling), feature flags, database migrations, rollbacks, and DORA metrics — with a Q&A bank."
+title: "CI/CD & Deployment — Interview Handbook"
+description: "CI/CD: pipeline stages, trunk-based dev, blue-green/canary deployments, feature flags, database migrations, and DORA metrics — with a Q&A bank."
 sidebar:
   label: "CI/CD & Deployment"
 ---

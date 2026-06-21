@@ -1,6 +1,6 @@
 ---
-title: "Algorithms: Sorting & Searching — Advanced Interview Handbook"
-description: "Sorting and searching algorithms explained simply with time/space complexity, stability, and in-place properties — plus how Java, Kotlin, and Spring Boot actually use them in real life (Arrays.sort dual-pivot quicksort, TimSort, Collections.sort, binarySearch, hashing, B-tree indexes) — with a Q&A bank and cheat sheet."
+title: "Sorting & Searching Algorithms — Interview Handbook"
+description: "Sorting and searching: time/space complexity, stability, and how Java/Kotlin use them — Arrays.sort, TimSort, binarySearch, hashing — with a Q&A bank."
 sidebar:
   label: "Algorithms: Sort & Search"
 ---

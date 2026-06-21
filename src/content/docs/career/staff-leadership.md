@@ -1,6 +1,6 @@
 ---
 title: "Staff Behavioral & Leadership — Interview Handbook"
-description: "The non-technical half of the staff/principal loop: what 'staff' really means, the archetypes, influence without authority, leading cross-team projects, the STAR stories interviewers probe, technical judgment, incident leadership, and communication — with a behavioral Q&A bank."
+description: "Staff and principal behavioral interviews: archetypes, influence without authority, STAR stories, incident leadership, and communication — with a Q&A bank."
 sidebar:
   label: "Staff Behavioral & Leadership"
 ---

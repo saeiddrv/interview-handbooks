@@ -1,6 +1,6 @@
 ---
-title: "Distributed Systems Theory — Staff Interview Handbook"
-description: "The distributed-systems vocabulary staff interviews probe: CAP/PACELC, consistency models, time & logical clocks, replication, quorums, consensus, idempotency, CRDTs, and the classic failure modes — with a deep Q&A bank."
+title: "Distributed Systems — Interview Handbook"
+description: "Distributed systems theory: CAP/PACELC, consistency models, logical clocks, replication, quorums, consensus, idempotency, and CRDTs — with a Q&A bank."
 sidebar:
   label: "Distributed Systems Theory"
 ---

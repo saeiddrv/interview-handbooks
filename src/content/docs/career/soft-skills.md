@@ -1,6 +1,6 @@
 ---
 title: "Soft Skills & Communication — Interview Handbook"
-description: "The human skills that decide senior+ interviews and careers: communication, active listening, giving and receiving feedback, handling disagreement, collaboration, time and stakeholder management, written communication, mentoring, and how to show them in interviews — with a behavioral Q&A bank."
+description: "Senior+ human skills: communication, active listening, feedback, disagreement, collaboration, stakeholder management, and mentoring — with a Q&A bank."
 sidebar:
   label: "Soft Skills & Communication"
 ---

@@ -1,6 +1,6 @@
 ---
-title: "Java & Kotlin Concurrency — Advanced Interview Handbook"
-description: "Concurrency in Java and Kotlin made clear and deep: race conditions, the Java Memory Model (happens-before, volatile), synchronized vs atomics/CAS, locks, wait/notify and synchronizers (latch/barrier/semaphore), executors and thread pools, CompletableFuture, virtual threads (Loom), and Kotlin coroutines/Flow — with tricks, traps, and a Q&A bank."
+title: "Java & Kotlin Concurrency — Interview Handbook"
+description: "Java and Kotlin concurrency: the Java Memory Model, synchronized vs atomics, thread pools, virtual threads, and Kotlin coroutines — with a Q&A bank."
 sidebar:
   label: "Java & Kotlin Concurrency"
 ---

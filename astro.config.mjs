@@ -19,6 +19,8 @@ export default defineConfig({
         { tag: 'meta', attrs: { property: 'og:image:width', content: '1200' } },
         { tag: 'meta', attrs: { property: 'og:image:height', content: '630' } },
         { tag: 'meta', attrs: { name: 'twitter:image', content: 'https://interview.saeiddrv.com/og.png' } },
+        { tag: 'meta', attrs: { name: 'twitter:title', content: 'Interview Handbooks' } },
+        { tag: 'meta', attrs: { name: 'twitter:description', content: 'Free, open-source interview handbooks for senior, staff, and principal engineers — real examples, deep Q&A, and ready-to-say answers.' } },
         // Icons & PWA
         { tag: 'link', attrs: { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' } },
         { tag: 'link', attrs: { rel: 'manifest', href: '/site.webmanifest' } },
@@ -44,7 +46,22 @@ export default defineConfig({
         baseUrl: 'https://github.com/saeiddrv/interview-handbooks/edit/main/',
       },
       sidebar: [
-        { label: 'Data & Storage', items: ['data-storage/postgresql', 'data-storage/redis', 'data-storage/elasticsearch'] },
+        { label: 'Data & Storage', items: [
+          { label: 'PostgreSQL', items: [
+            'data-storage/postgresql',
+            'data-storage/postgresql/transactions',
+            'data-storage/postgresql/sql-cheatsheet',
+            'data-storage/postgresql/recipes',
+            'data-storage/postgresql/performance',
+            'data-storage/postgresql/replication',
+            'data-storage/postgresql/operations',
+            'data-storage/postgresql/vs-mysql',
+            'data-storage/postgresql/modern-features',
+            'data-storage/postgresql/q-and-a',
+          ]},
+          'data-storage/redis',
+          'data-storage/elasticsearch',
+        ]},
         { label: 'Messaging & APIs', items: ['messaging/kafka-vs-rabbitmq', 'messaging/grpc', 'messaging/api-design'] },
         { label: 'Backend', items: ['backend/spring-boot', 'backend/ktor', 'backend/hibernate-jpa', 'backend/jvm-internals', 'backend/language-tricky-points', 'backend/design-patterns', 'backend/data-structures', 'backend/algorithms', 'backend/concurrency', 'backend/async-reactive'] },
         { label: 'Architecture & Infra', items: ['architecture/system-design', 'architecture/distributed-systems', 'architecture/microservices', 'architecture/docker', 'architecture/kubernetes', 'architecture/nginx-load-balancing'] },

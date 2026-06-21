@@ -1,6 +1,6 @@
 ---
-title: "Testing Strategy — Advanced Interview Handbook"
-description: "Testing that gives confidence without slowing you down: the test pyramid (vs ice-cream cone and trophy), unit vs integration vs e2e, test doubles (mock/stub/fake/spy), TDD, what to test and what not to, flaky tests, contract testing, coverage myths, testcontainers, and testing in production — with a Q&A bank."
+title: "Testing Strategy — Interview Handbook"
+description: "Testing strategy: the test pyramid, test doubles, TDD, contract testing, flaky tests, coverage myths, and testing in production — with a Q&A bank."
 sidebar:
   label: "Testing Strategy"
 ---

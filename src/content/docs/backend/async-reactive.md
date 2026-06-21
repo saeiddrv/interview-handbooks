@@ -1,6 +1,6 @@
 ---
-title: "Asynchronous & Reactive Programming — Advanced Interview Handbook"
-description: "The async paradigm explained clearly: sync vs async, blocking vs non-blocking I/O, concurrency vs parallelism, the C10k problem and the event loop, the evolution from callbacks to Futures to Reactive Streams to coroutines and virtual threads, backpressure, Reactor (Mono/Flux), Spring MVC vs WebFlux, and the modern 'virtual threads vs reactive' debate — with a Q&A bank."
+title: "Async & Reactive Programming — Interview Handbook"
+description: "Async programming: the event loop, backpressure, Reactor, Spring WebFlux, virtual threads vs reactive, coroutines, and the C10k problem — with a Q&A bank."
 sidebar:
   label: "Async & Reactive Programming"
 ---

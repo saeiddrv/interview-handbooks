@@ -1,6 +1,6 @@
 ---
-title: "Secure Coding in Java & Kotlin — Advanced Interview Handbook"
-description: "Writing secure code in Java/Kotlin: the OWASP Top 10 in practice, preventing SQL/command injection (PreparedStatement, JPA bind params), XSS and output encoding, CSRF, insecure deserialization (Java native serial RCE, Jackson default typing, kotlinx.serialization), input validation (Bean Validation), password hashing and secrets, cryptography (SecureRandom, AES-GCM), broken access control and IDOR, XXE/SSRF/path traversal, and what Spring Boot and Ktor give you by default — with a Q&A bank."
+title: "Secure Coding in Java & Kotlin — Interview Handbook"
+description: "Secure Java/Kotlin: OWASP Top 10, SQL injection, XSS, CSRF, deserialization, password hashing, cryptography, and broken access control — with a Q&A bank."
 sidebar:
   label: "Secure Coding"
 ---

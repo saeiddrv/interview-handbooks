@@ -1,6 +1,6 @@
 ---
-title: "Java & Kotlin Language Tricky Points — Advanced Interview Handbook"
-description: "The low-level language details interviewers probe: access modifiers/visibility (Java vs Kotlin), the Object/Any class and which methods you can override, inheritance and static tricks (override vs overload vs hide), equals vs == (and Kotlin == vs ===), the equals/hashCode contract, String immutability and the string pool/interning, the Integer cache and autoboxing traps, clone vs copy (shallow vs deep), pass-by-value, and serialization (Serializable, serialVersionUID, transient, kotlinx.serialization) — with a Q&A bank."
+title: "Java & Kotlin Language Tricky Points — Interview Handbook"
+description: "Java and Kotlin language traps: equals/hashCode, String pool, Integer cache, autoboxing, serialization, and visibility rules — with a Q&A bank."
 sidebar:
   label: "Language Tricky Points"
 ---

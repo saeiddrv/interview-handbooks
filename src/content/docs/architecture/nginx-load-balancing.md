@@ -1,5 +1,5 @@
 ---
-title: "Nginx & Load Balancing — Advanced Interview Handbook"
+title: "Nginx & Load Balancing — Interview Handbook"
 description: "A deep, easy-to-understand guide to Nginx, reverse proxying, and load balancing for senior interviews: how Nginx's event model makes it fast, reverse…"
 sidebar:
   label: "Nginx & Load Balancing"

@@ -1,6 +1,6 @@
 ---
-title: "Observability & SRE — Advanced Interview Handbook"
-description: "Running systems in production: the three pillars (metrics, logs, traces), the tooling landscape (Prometheus, Grafana, Loki, ELK, Jaeger/Tempo, OpenTelemetry, SigNoz, Datadog) with pros/cons, tracking logs & traces across microservices, SLI/SLO/SLA and error budgets, RED/USE, alerting on symptoms, incident response, blameless postmortems, and monitoring best practices — with a Q&A bank."
+title: "Observability & SRE — Interview Handbook"
+description: "Observability and SRE: metrics, logs, traces, Prometheus, Grafana, OpenTelemetry, SLO/SLA, error budgets, alerting, incident response — with a Q&A bank."
 sidebar:
   label: "Observability & SRE"
 ---
