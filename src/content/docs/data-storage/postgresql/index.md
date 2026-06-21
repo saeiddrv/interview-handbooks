@@ -1255,75 +1255,81 @@ This section covers three things:
 
 ### 6.1 How commands affect each other
 
-Every command that touches a table acquires a lock automatically.
-Here is exactly what each command locks, what it blocks, and for how long:
+Postgres locks at two levels:
+- **Whole table** — every command automatically acquires a lock on the entire table. The lock strength varies by command: a `SELECT` takes the weakest lock (nothing is blocked), while `ALTER TABLE` takes the strongest (everything is blocked). This is what determines whether two commands can run at the same time.
+- **Individual rows** — write commands additionally lock only the specific rows they are touching. Two writes on different rows never block each other.
 
 ---
 
-**`SELECT`**
-- **Blocks:** nothing — SELECT never blocks any other query
-- **Blocked by:** `ALTER TABLE`, `DROP TABLE`, `TRUNCATE` (if one of those is running, SELECT waits)
-- **Duration:** held while the query runs, released immediately after
+**`SELECT` — blocks nothing**
+
+Never blocks `INSERT`, `UPDATE`, `DELETE`, or other `SELECT`s.
+The only thing that makes a `SELECT` wait is a structural change running at the same time
+(`ALTER TABLE`, `DROP TABLE`, `TRUNCATE`) — and those wait for any running `SELECT` to finish first.
+
 ```sql
 SELECT * FROM orders WHERE user_id = 42;
--- INSERT, UPDATE, DELETE, other SELECTs all run freely alongside this
+-- Everything else runs freely alongside this
 ```
 
 ---
 
-**`INSERT` / `UPDATE` / `DELETE`**
-- **Blocks:** other writes on the **same row** — if two transactions update the same row simultaneously, one waits for the other to finish
-- **Does NOT block:** `SELECT`, and writes on **different rows** run freely
-- **Blocked by:** `ALTER TABLE`, `DROP TABLE`, `TRUNCATE`, `CREATE INDEX` (standard)
-- **Duration:** held for the duration of the transaction
+**`INSERT` / `UPDATE` / `DELETE` — locks only the rows being touched**
+
+Two writes on the **same row** block each other — one waits for the other to commit.
+Two writes on **different rows** run freely in parallel.
+`SELECT` is never blocked — it reads a snapshot.
+Structural changes (`ALTER TABLE`, `DROP TABLE`) block and are blocked by these commands.
+
 ```sql
 UPDATE orders SET status = 'paid' WHERE id = 1;
--- Another UPDATE on id=1 must wait until this transaction commits
--- An UPDATE on id=2 runs freely — different row, no conflict
--- A SELECT on id=1 also runs freely — MVCC gives it a snapshot
+
+-- Another UPDATE on id = 1  → waits   (same row)
+-- An UPDATE on id = 2       → runs    (different row)
+-- A SELECT on id = 1        → runs    (reads a snapshot, never waits)
+-- An ALTER TABLE on orders  → waits   (structural change)
 ```
 
 ---
 
-**`CREATE INDEX` (standard)**
-- **Blocks:** `INSERT`, `UPDATE`, `DELETE` — writes queue up and wait
-- **Does NOT block:** `SELECT` — reads continue freely
-- **Blocked by:** running `INSERT`, `UPDATE`, `DELETE` transactions — waits for them to commit first
-- **Duration:** held until the entire index is built (can be minutes on a large table)
+**`CREATE INDEX` — freezes all writes on the whole table**
+
+While the index is building, no `INSERT`, `UPDATE`, or `DELETE` can run on that table.
+`SELECT` continues freely. On a large table this can take minutes — your app cannot write a single row the whole time.
+Always use `CONCURRENTLY` in production.
+
 ```sql
-CREATE INDEX ON orders (created_at);
--- All writes to orders are frozen until this finishes
--- Use CONCURRENTLY to avoid this:
-CREATE INDEX CONCURRENTLY ON orders (created_at);  -- blocks nothing
+CREATE INDEX ON orders (created_at);            -- all writes frozen until done
+CREATE INDEX CONCURRENTLY ON orders (created_at); -- writes continue freely
 ```
 
 ---
 
-**`VACUUM` / `ANALYZE` / `CREATE INDEX CONCURRENTLY`**
-- **Blocks:** nothing — these run safely alongside all normal queries
-- **Blocked by:** `ALTER TABLE`, `DROP TABLE`, another concurrent `VACUUM` on the same table
-- **Duration:** held while the operation runs
+**`VACUUM` / `ANALYZE` / `CREATE INDEX CONCURRENTLY` — block nothing**
+
+Run safely alongside all normal queries. Your app feels nothing.
+
 ```sql
-VACUUM orders;    -- SELECT, INSERT, UPDATE, DELETE all continue normally
-ANALYZE orders;   -- same — your app feels nothing
+VACUUM orders;   -- SELECT, INSERT, UPDATE, DELETE all continue
+ANALYZE orders;  -- same
 ```
 
 ---
 
-**`ALTER TABLE` / `DROP TABLE` / `TRUNCATE` / `VACUUM FULL`**
-- **Blocks:** everything — SELECT, INSERT, UPDATE, DELETE all freeze
-- **Blocked by:** everything — waits for every running query to finish first
-- **Duration:** held until the command completes
+**`ALTER TABLE` / `DROP TABLE` / `TRUNCATE` / `VACUUM FULL` — freeze everything**
+
+These wait for every running query to finish, then block all new queries —
+including plain `SELECT`s — until they complete.
+
 ```sql
 ALTER TABLE orders ADD COLUMN note text;
 -- Waits for all running queries to finish
--- Then blocks all new queries until ALTER is done
--- Then releases — everything continues
+-- Then freezes SELECT, INSERT, UPDATE, DELETE until ALTER is done
 ```
 
-> **Production trap:** if a slow SELECT is running (e.g. a 30-second report), your
-> `ALTER TABLE` queues behind it. Every new query then queues behind the `ALTER TABLE`.
-> Your entire app stalls. Always run schema changes in a low-traffic window.
+> **Trap:** a slow `SELECT` (e.g. a 30-second report) blocks your `ALTER TABLE`.
+> Every new query then queues behind the `ALTER TABLE`. Your entire app stalls.
+> Always run schema changes in a low-traffic window and set `lock_timeout`.
 
 ---
 
