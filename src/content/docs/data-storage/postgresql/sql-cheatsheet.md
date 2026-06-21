@@ -11,7 +11,7 @@ sidebar:
 ```sql
 SELECT id, name FROM users;                      -- pick columns (avoid SELECT * in prod)
 SELECT DISTINCT country FROM users;              -- unique values
-SELECT * FROM users WHERE age >= 18 AND active;  -- filter
+SELECT * FROM users WHERE age >= 18 AND active = true;  -- filter (active is a boolean column)
 SELECT * FROM users WHERE country IN ('US','UK');-- set membership
 SELECT * FROM users WHERE name LIKE 'Jo%';       -- pattern (case-sensitive)
 SELECT * FROM users WHERE name ILIKE 'jo%';      -- pattern (case-INsensitive) PG-specific
