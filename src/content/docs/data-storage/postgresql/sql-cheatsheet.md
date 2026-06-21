@@ -7,11 +7,6 @@ sidebar:
 
 > A practical, copy-ready reference for every kind of query you will write or be asked about — with tricks, gotchas, and senior-level patterns.
 
-## SQL Reference
-
-A practical, copy-ready reference for **every kind of query you'll write or be asked about** - with the
-tricks, gotchas, and senior-level patterns interviewers look for.
-
 ### 1. SELECT basics & filtering
 ```sql
 SELECT id, name FROM users;                      -- pick columns (avoid SELECT * in prod)
