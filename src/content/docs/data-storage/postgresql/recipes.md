@@ -7,11 +7,6 @@ sidebar:
 
 > Copy-ready, real-world snippets for setting up indexes, full-text search, partitioning, and more — with when and why to use each.
 
-## Practical Recipes
-
-Copy-ready, real-world snippets for setting up indexes, full-text search, partitioning, and the rest -
-with *when* and *why* to use each.
-
 ### 1. Creating each index type on a real field
 ```sql
 -- B-Tree (the default): equality, ranges, sorting
