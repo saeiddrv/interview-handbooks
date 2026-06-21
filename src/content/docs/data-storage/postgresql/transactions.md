@@ -35,8 +35,15 @@ COMMIT;
 ```
 
 > **Trap:** in Postgres, once *any* statement in a transaction errors, the whole transaction is
-> **aborted** — every following statement fails with "current transaction is aborted" until you
-> `ROLLBACK` (or roll back to a savepoint taken before the error). There is no "ignore and continue."
+> **aborted** — every following statement fails with `"current transaction is aborted"` and nothing
+> will work until you recover. You have two options:
+> - **No savepoint before the error:** you must `ROLLBACK` the entire transaction. Everything is lost.
+> - **Savepoint set before the error:** `ROLLBACK TO savepoint_name` undoes only from that point
+>   forward — the transaction stays open and you can continue.
+>
+> `ROLLBACK TO` is an **undo**, not a retry. After rolling back to a savepoint you must take a
+> different path — skipping or replacing the failing statement. Rolling back and immediately
+> running the exact same failing statement again will fail again for the same reason.
 
 ---
 
