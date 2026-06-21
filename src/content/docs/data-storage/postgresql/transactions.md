@@ -58,7 +58,7 @@ these:
 | **Non-repeatable read** | You read a row twice and get different values (someone committed an UPDATE in between) | A price is \$20, then \$25 within the same transaction |
 | **Phantom read** | You run the same query twice and get *different rows* (someone committed an INSERT/DELETE) | `COUNT(*)` returns 10, then 11 |
 | **Lost update** | Two transactions read-modify-write the same row; one overwrites the other | Both add \$10 to a balance, but only one \$10 sticks |
-| **Serialization anomaly (write skew)** | Each transaction is individually valid, but together they break an invariant | Two doctors both go off-call because each sees the other still on-call |
+| **Serialization anomaly (write skew)** | Two transactions read the same data, each make a valid change to a different row, but their combined result breaks a rule that neither could detect alone | Two users share an account ($100). Both check the balance, both see $100 ≥ their withdrawal. Both withdraw $80. Final balance: −$60. Each was valid alone — together they broke the rule. |
 
 > **Senior framing:** "Isolation levels are a dial trading **correctness for concurrency**. Higher
 > isolation removes more anomalies but causes more conflicts (and retries). The job is to pick the
@@ -68,17 +68,18 @@ these:
 
 ## 3. The Isolation Levels in PostgreSQL
 
-The SQL standard defines four levels. **Postgres only really has three** — it never allows dirty
-reads, so `READ UNCOMMITTED` behaves exactly like `READ COMMITTED`.
+The SQL standard defines four levels but **Postgres effectively has three** — it never allows dirty
+reads at any level, so `READ UNCOMMITTED` behaves identically to `READ COMMITTED`. Setting it
+explicitly has no effect.
 
 | Level | Dirty read | Non-repeatable read | Phantom read | Write skew | Default? |
 |---|---|---|---|---|---|
-| **Read Uncommitted** | No* | Possible | Possible | Possible | (acts as Read Committed) |
-| **Read Committed** | No | Possible | Possible | Possible | **Yes — the default** |
-| **Repeatable Read** | No | No | **No** (stricter than the standard) | Possible | |
-| **Serializable** | No | No | No | **No** | |
+| **Read Committed** | Never | Possible | Possible | Possible | **Yes** |
+| **Repeatable Read** | Never | No | **No** (stricter than the standard) | Possible | |
+| **Serializable** | Never | No | No | **No** | |
 
-\* Postgres never permits dirty reads at any level.
+> **Read Uncommitted** is accepted as a valid syntax but Postgres silently runs it as
+> Read Committed. It is not a separate behaviour — do not use it.
 
 ```sql
 -- Set the level for one transaction:
@@ -123,19 +124,30 @@ snapshot comparison, not a lock.
 Each **statement** gets a fresh snapshot. So within one transaction, two identical `SELECT`s can
 return different data if someone committed in between (a non-repeatable read).
 
-The subtle part interviewers love is what happens when an `UPDATE` collides with a concurrent commit:
+The subtle part interviewers love is what happens when two transactions update the same row at the same time:
 
 ```sql
 -- balance starts at 100
--- Transaction A (Read Committed):
+
+-- Transaction A runs this:
 UPDATE accounts SET balance = balance - 50 WHERE id = 1 AND balance >= 50;
+
+-- Transaction B commits first and sets balance to 30.
+-- Now Transaction A gets the row lock and is about to run.
 ```
 
-If transaction B commits a change to that row *while A is waiting for the lock*, Postgres does
-**not** use A's original snapshot. It **re-reads the latest committed row version and re-evaluates
-the `WHERE` clause** against it. This prevents some lost updates — but only because the arithmetic
-(`balance - 50`) is done on the freshly re-read value. If you instead read in your app and write
-back a literal, you lose the update (see §6).
+At this point Postgres does **not** use A's original snapshot (where balance was 100).
+It **re-reads the row** — sees balance is now 30 — and **re-evaluates the `WHERE` clause**:
+`30 >= 50` is false, so the UPDATE affects 0 rows. No money is deducted. The check worked.
+
+This only works because the math (`balance - 50`) is in the SQL itself, computed on the fresh value.
+If you read the balance in your app first and write back a fixed number, Postgres has nothing to re-evaluate:
+
+```sql
+-- UNSAFE: app reads balance = 100, computes 100 - 50 = 50, writes it back as a literal
+UPDATE accounts SET balance = 50 WHERE id = 1;
+-- B already set balance to 30 — this silently overwrites it back to 50. Money is created from nowhere.
+```
 
 > **Senior answer:** "Read Committed gives statement-level snapshots, so a single statement is
 > consistent but the transaction as a whole is not. On a write conflict it re-reads the latest row
@@ -261,12 +273,12 @@ for attempt in range(5):
 
 ## 10. Choosing a Level
 
-| Situation | Level |
-|---|---|
-| Normal CRUD web app | **Read Committed** (default) — simplest, most concurrent |
-| Multi-statement read that must be point-in-time consistent | **Repeatable Read** |
-| Invariant spanning multiple rows/tables (write skew risk) | **Serializable** + retry loop |
-| Simple counter / balance update | **Read Committed** + atomic `x = x + n` |
+| Situation | Level | Real-world example |
+|---|---|---|
+| Normal CRUD web app | **Read Committed** (default) | Creating a user, placing an order, posting a comment |
+| Multi-statement read that must be point-in-time consistent | **Repeatable Read** | Generating a financial report that sums orders, refunds, and fees — all must reflect the same moment |
+| Invariant spanning multiple rows/tables (write skew risk) | **Serializable** + retry loop | Booking a seat only if the flight is not full — two concurrent bookings must not both see "1 seat left" |
+| Simple counter / balance update | **Read Committed** + atomic `x = x + n` | Decrementing inventory on purchase, adding points to a loyalty account |
 
 The rule: **start at Read Committed, escalate only when a real anomaly threatens an invariant**, and
 when you do escalate, add the retry loop.
